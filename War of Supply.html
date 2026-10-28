@@ -1,0 +1,1798 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>War of Supply</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:dark;
+    --navy:#1B2A41;
+    --navy-2:#233C5C;
+    --canvas:#EEE6D3;
+    --canvas-2:#E4D9C0;
+    --thread:#A6373D;
+    --thread-dark:#832C31;
+    --mustard:#CE9A3A;
+    --ink:#20232B;
+    --ink-soft:#5B5A52;
+    --green:#3E7A52;
+    --line: #cabf9f;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(27,42,65,0.035) 0px, rgba(27,42,65,0.035) 1px, transparent 1px, transparent 26px);
+  }
+  h1,h2,h3,h4{
+    font-family:'Space Grotesk',sans-serif;
+    margin:0 0 8px 0;
+    color:var(--navy);
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:var(--navy-2);}
+
+  /* ---------- Header ---------- */
+  header{
+    background:var(--navy);
+    color:var(--canvas);
+    padding:14px 22px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+    border-bottom:4px solid var(--mustard);
+  }
+  .brand{display:flex; align-items:center; gap:12px; margin-right:auto;}
+  .brand .spool{
+    width:34px;height:34px;border-radius:50%;
+    background: conic-gradient(from 90deg, var(--thread), var(--mustard), var(--thread));
+    border:3px solid var(--canvas);
+    flex:none;
+  }
+  .brand h1{color:var(--canvas); font-size:19px; margin:0;}
+  .brand p{color:#C9C2AC; margin:0; font-size:12px; letter-spacing:0.02em;}
+
+  .team-box{display:flex; align-items:center; gap:8px;}
+  .team-box input{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.3);
+    color:var(--canvas);
+    padding:7px 10px;
+    border-radius:var(--radius);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    width:150px;
+  }
+  .team-box input::placeholder{color:#9aa0ab;}
+  .team-box button, .btn{
+    background:var(--thread);
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:var(--radius);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    letter-spacing:0.01em;
+  }
+  .btn.secondary{background:transparent; border:1px solid var(--navy-2); color:var(--navy-2);}
+  .btn.gold{background:var(--mustard); color:var(--navy);}
+  .btn.small{padding:5px 10px; font-size:12px;}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+  header .btn{background:var(--mustard); color:var(--navy);}
+
+  .timer-box{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,0.07);
+    padding:6px 14px;
+    border-radius:var(--radius);
+  }
+  .timer-box .clock{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:22px;
+    font-weight:600;
+    color:var(--mustard);
+    min-width:74px;
+    text-align:center;
+  }
+  .timer-box.warn .clock{color:#E88A6A;}
+  .timer-box .lbl{font-size:11px; color:#C9C2AC; text-transform:uppercase; letter-spacing:0.06em;}
+
+  /* ---------- Tabs ---------- */
+  nav.tabs{
+    display:flex;
+    background:var(--canvas-2);
+    border-bottom:2px solid var(--line);
+    padding:0 18px;
+    gap:2px;
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    background:none; border:none;
+    padding:13px 18px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    white-space:nowrap;
+  }
+  nav.tabs button.active{color:var(--navy); border-bottom-color:var(--thread);}
+  nav.tabs button:hover:not(.active){color:var(--navy);}
+
+  main{max-width:1080px; margin:0 auto; padding:24px 20px 70px;}
+  .card{
+    background:#FBF8F1;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  .card.accent{border-left:5px solid var(--thread);}
+  .badge{
+    display:inline-block;
+    background:var(--navy);
+    color:var(--canvas);
+    font-size:11px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:2px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .badge.gold{background:var(--mustard); color:var(--navy);}
+  .badge.thread{background:var(--thread); color:#fff;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th,td{border:1px solid var(--line); padding:7px 9px; text-align:left;}
+  th{background:var(--canvas-2); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px;}
+  td.num, th.num{text-align:right; font-family:'IBM Plex Mono',monospace;}
+  tr.total-row td{font-weight:700; background:#f2ead6;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+
+  input[type=number], select, textarea{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    padding:6px 8px;
+    border:1px solid #b9ad8a;
+    border-radius:2px;
+    background:#fff;
+    width:100%;
+  }
+  select{font-family:'Inter',sans-serif;}
+  input[type=number]{text-align:right;}
+  textarea{font-family:'Inter',sans-serif; min-height:110px; resize:vertical;}
+
+  .flag{padding:9px 12px; border-radius:2px; font-size:13px; margin-top:10px;}
+  .flag.ok{background:#E4EFE7; color:var(--green); border:1px solid #bcd8c4;}
+  .flag.bad{background:#F6E4E2; color:var(--thread-dark); border:1px solid #e6bcb8;}
+  .flag.info{background:#EAF0F5; color:var(--navy-2); border:1px solid #c7d8e5;}
+
+  .method-card{border:1px solid var(--line); border-radius:var(--radius); padding:16px; background:#fff; margin-bottom:14px;}
+  .method-card h4{display:flex; align-items:center; justify-content:space-between; font-size:16px;}
+  .method-card .kv{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dotted #ddd2ac; font-size:13.5px;}
+  .method-card .kv:last-child{border-bottom:none;}
+  .method-card .kv .v{font-family:'IBM Plex Mono',monospace; font-weight:600;}
+  .method-card .kv.highlight .v{color:var(--thread-dark); font-size:15px;}
+
+  .diagram{width:100%;}
+  .diagram text{font-family:'Space Grotesk',sans-serif; font-size:11px; fill:var(--ink);}
+
+  footer.tabfoot{display:flex; justify-content:space-between; margin-top:6px;}
+
+  .score-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--navy); color:var(--canvas);
+    padding:10px 16px; border-radius:2px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px;
+  }
+  .score-pill span.label{font-size:11px; font-weight:500; color:#C9C2AC; text-transform:uppercase;}
+
+  .leaderboard-row{display:grid; grid-template-columns:44px 1fr 110px 90px 110px 80px; gap:10px; align-items:center; padding:10px 12px; border-bottom:1px solid var(--line);}
+  .leaderboard-row.head{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; text-transform:uppercase; color:var(--ink-soft); background:var(--canvas-2);}
+  .leaderboard-row .rank{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:16px;}
+  .leaderboard-row.r1 .rank{color:#B8860B;}
+  .leaderboard-row.r2 .rank{color:#7d7d7d;}
+  .leaderboard-row.r3 .rank{color:#a05a2c;}
+  .leaderboard-row .num{font-family:'IBM Plex Mono',monospace; text-align:right;}
+
+  .locked-banner{background:var(--thread); color:#fff; padding:10px 14px; border-radius:2px; margin-bottom:14px; font-weight:600;}
+
+  #judgePanel textarea, #judgePanel input{margin-bottom:8px;}
+
+  /* WAR OF SUPPLY COMMAND VISUALS */
+  body{background-color:#111820;color:#E8E2D5;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:28px 28px;}
+  h1,h2,h3,h4{color:#E8E2D5;text-transform:none;}
+  header{background:#0A0F14;border-bottom:4px solid #C49A3A;box-shadow:0 4px 18px rgba(0,0,0,.35);}
+  .brand .spool{background:conic-gradient(from 90deg,#A6373D,#C49A3A,#263B4D,#A6373D);}
+  nav.tabs{background:#151E27;border-bottom:2px solid #35424E;}
+  nav.tabs button{color:#9DA7B0;} nav.tabs button.active{color:#F0E8D7;border-bottom-color:#C49A3A;}
+  main{max-width:1120px;}
+  .card{background:#18212A;border:1px solid #35424E;box-shadow:0 8px 20px rgba(0,0,0,.16);}
+  .card.accent{border-left:5px solid #A6373D;}
+  .badge{background:#263B4D;color:#E8E2D5;border:1px solid #40515F;}
+  .badge.gold{background:#C49A3A;color:#111820;border-color:#D5B25D;}
+  .badge.thread{background:#A6373D;border-color:#C2575D;}
+  th{background:#202C36;color:#E8E2D5;border-color:#3B4853;} th,td{border-color:#3B4853;} td{color:#D9D5CB;}
+  tr.total-row td{background:#222D35;}
+  input[type=number],select,textarea{background:#0F151B;color:#E8E2D5;border-color:#465562;}
+  .flag.info{background:#182D3C;color:#BFD7E7;border-color:#35546A;} .flag.ok{background:#193126;color:#B9D9C3;border-color:#315E43;} .flag.bad{background:#351D20;color:#F0B9B9;border-color:#67343A;}
+  .method-card{background:#111820;border-color:#3B4853;} .method-card .kv{border-bottom-color:#34404A;}
+  .diagram{background:#0D1318;border:1px solid #34414B;border-radius:3px;padding:8px;}
+  .diagram text{fill:#DAD5CA;} .diagram text.t1{font-size:13px;font-weight:600;fill:#F0E8D7} .diagram text.t2{font-size:11px;fill:#9DA7B0} .diagram text.th{font-size:13px;font-weight:700;fill:#C49A3A;letter-spacing:.06em}
+  .round-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(90deg,#8F2F35,#263B4D);border:1px solid #A94A50;padding:14px 16px;margin-bottom:16px;border-radius:3px;}
+  .round-number{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#F2D68A;letter-spacing:.08em;text-transform:uppercase;}
+  .mission{border-left:3px solid #C49A3A;padding-left:12px;}
+  .event-card{position:relative;overflow:hidden;border:1px solid #6A4E23;background:linear-gradient(135deg,#221E17,#18212A);}
+  .event-card:after{content:'⚠';position:absolute;right:18px;top:12px;font-size:34px;opacity:.14;}
+  .progress-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0 18px;}
+  .progress-strip div{padding:7px 9px;background:#202A33;border:1px solid #35424E;font-size:11px;text-align:center;text-transform:uppercase;letter-spacing:.05em;color:#89949E;}
+  .progress-strip .live{background:#5A2529;color:#F5D9D9;border-color:#A6373D;}
+  .impact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;} @media(max-width:800px){.impact-grid{grid-template-columns:1fr;}}
+  .impact{padding:14px;border:1px solid #3B4853;background:#111820;}.impact strong{display:block;color:#C49A3A;margin-bottom:4px;}
+  .score-pill{background:#0A0F14;border:1px solid #C49A3A;color:#F1E7D1;}
+
+/* ===== WAR OF SUPPLY v2 · MAX LEAN DIFFICULTY ===== */
+.advanced-banner{border:1px solid #C49A3A;background:linear-gradient(135deg,#251D12,#18212A);padding:14px 16px;border-radius:3px;margin-bottom:16px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+@media(max-width:800px){.kpi-grid{grid-template-columns:1fr 1fr}}
+.kpi{padding:12px;background:#10171D;border:1px solid #3B4853}.kpi b{display:block;color:#C49A3A;font-family:'IBM Plex Mono',monospace;font-size:18px}.kpi span{font-size:11px;color:#9DA7B0;text-transform:uppercase}
+.challenge-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:800px){.challenge-grid{grid-template-columns:1fr}}
+.locked-data{background:#211B14;border:1px dashed #8E6C35;padding:10px 12px;color:#D8C9A9;font-size:12.5px}
+.concept-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.concept-tags span{padding:4px 8px;border:1px solid #465562;background:#111820;color:#C9D0D5;border-radius:2px;font-size:11px}
+.scorebar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:12px 0}.scorebar div{font-size:10px;padding:6px 4px;text-align:center;background:#202A33;border:1px solid #35424E;color:#AEB6BD}
+.scorebar .live{background:#5A2529;border-color:#A6373D;color:#F4D9D9}
+
+/* ===== COMMAND BOARD · TEAM vs CORRECT ANSWERS ===== */
+.cmp-h{margin:20px 0 6px;font-size:14px;color:#C49A3A;letter-spacing:.02em}
+.cmp-wrap{overflow-x:auto}
+.cmp-wrap table{min-width:520px}
+.cmp-ok{color:#8FD1A1;font-weight:600}
+.cmp-part{color:#E6C46A;font-weight:600}
+.cmp-bad{color:#F0A0A0;font-weight:600}
+.cmp-neu{color:#9DA7B0}
+.cmp-t{table-layout:fixed}.cmp-t th:nth-child(1){width:38%}.cmp-t th:nth-child(4){width:19%}.cmp-t th:nth-child(5){width:13%}
+tr.cmp-group td{background:#202C36;font-family:'Space Grotesk',sans-serif;font-weight:600;color:#E8E2D5}
+.cmp-ref{color:#9DA7B0;font-size:11.5px}
+td.cmp-diff{background:#2A1E21}
+td.cmp-same{background:#1A2A22}
+.cmp-legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+
+
+#wosToast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);max-width:min(560px,calc(100vw - 32px));background:#0A0F14;color:#F1E7D1;border:1px solid #C49A3A;border-radius:3px;padding:10px 14px;font-size:13px;box-shadow:0 8px 26px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:10000}
+#wosToast.show{opacity:1;transform:translate(-50%,0)}
+.leaderboard-row{min-width:560px}
+#facPanel .card{overflow-x:auto}
+</style>
+
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="spool"></div>
+    <div>
+      <h1>WAR OF SUPPLY</h1>
+      <p>Emergency Supply Chain Command — MBA Lean Operations &amp; Systems • 4 Rounds • MAX DIFFICULTY</p>
+    </div>
+  </div>
+
+  <div class="team-box">
+    <input id="teamNameInput" type="text" placeholder="Team name" maxlength="24">
+    <button id="lockTeamBtn" class="btn small">Set Team</button>
+  </div>
+
+  <div class="timer-box" id="timerBox">
+    <div>
+      <div class="lbl">Time Left</div>
+      <div class="clock" id="clockDisplay">45:00</div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" id="tabNav">
+  <button data-tab="brief" class="active">COMMAND BRIEF</button>
+  <button data-tab="sourcing">ROUND 1 · SUPPLY</button>
+  <button data-tab="distribution">ROUND 2 · CONVOY</button>
+  <button data-tab="crisis">ROUND 3 · AMBUSH</button>
+  <button data-tab="flow">ROUND 4 · FLOW CONTROL</button>
+  <button data-tab="submit">FINAL LOCK</button>
+  <button data-tab="scoreboard">🔒 COMMAND BOARD</button>
+</nav>
+
+<main>
+
+<!-- ================= BRIEF TAB ================= -->
+<section id="tab-brief">
+  <div class="card accent">
+    <span class="badge thread">The CEO's Ask</span>
+    <h2>Operation Vijay — the supply chain is now the battlefield</h2>
+    <p><b>Historically inspired scenario:</b> it is June 1999 in the Kargil sector of Jammu &amp; Kashmir. Intruders have occupied the heights overlooking the Srinagar–Kargil–Leh highway (NH-1A), and the Indian Army has launched <b>Operation Vijay</b> to take them back. Everything the troops need — rations, ammunition, winter clothing, medical stores — must come by road through Zojila Pass, within sight of enemy observation posts. Frontline demand is exploding while fuel, trucks, road reliability and information quality are deteriorating. Your team is the <b>Vijay Supply Command</b>, responsible for keeping the forward posts supplied without creating Lean waste.</p>
+    <p>The <b>physical network</b> has four assembly camps — <b>Jammu Camp</b>, <b>Udhampur Camp</b>, <b>Banihal Camp</b>, <b>Anantnag Camp</b> — feed four front-line hubs — <b>Dras Hub</b>, <b>Mushkoh Hub</b>, <b>Kaksar Hub</b>, <b>Batalik Hub</b> — through the central <b>Srinagar DC</b>. What makes it hard is the operating environment and the number of interlocking decisions.</p>
+    <div class="grid2">
+      <div>
+        <h4>Upstream — secure the supplies</h4>
+        <p>Five supply bases hold the stock built up in the plains for the operation. Decide who ships how much to each assembly camp at the lowest landed cost, without breaching any base capacity.</p>
+      </div>
+      <div>
+        <h4>Downstream — move the supply kits</h4>
+        <p>Your mission has two kit types: <b>Priority Combat Kit (Rs 200/kit)</b> and <b>Standard Ration Kit (Rs 75/kit)</b>. Decide whether Direct Convoy, Milk-Run Convoy, or Srinagar DC is cheapest for each.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card advanced-banner">
+    <span class="badge gold">INTELLIGENCE FILE · CLASSIFIED</span>
+    <h3>The continuity of the mission</h3>
+    <p><b>08:00</b> — The railhead ends at Jammu and the mountain roads are shelled and snowed under, so rail cannot carry the load — trucks are the only option. <b>09:00</b> — a supply base reports damaged stock. <b>10:00</b> — fuel allocations tighten. <b>11:00</b> — Mushkoh Hub becomes inaccessible. <b>12:00</b> — demand surges for priority combat kits. <b>13:00</b> — a radio blackout freezes one information channel.</p>
+    <p>Every round <b>carries forward</b> the decisions, inventory and constraints created before it. A locally optimal decision can create a downstream bottleneck, excess WIP, stockout or recovery cost later.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge">Network Map &amp; Coordinates</span>
+    <svg class="diagram" viewBox="0 0 1150 560" role="img" aria-label="Operation Vijay supply network map">
+<text class="th" x="125" y="30" text-anchor="middle">SUPPLY BASES</text>
+<text class="th" x="445" y="30" text-anchor="middle">ASSEMBLY CAMPS</text>
+<text class="th" x="715" y="30" text-anchor="middle">SRINAGAR DC</text>
+<text class="th" x="1030" y="30" text-anchor="middle">FRONT-LINE HUBS</text>
+<g stroke="#8A7B55" stroke-width="1" opacity="0.45">
+<line x1="230" y1="95" x2="350" y2="120"/>
+<line x1="230" y1="95" x2="350" y2="230"/>
+<line x1="230" y1="95" x2="350" y2="340"/>
+<line x1="230" y1="95" x2="350" y2="450"/>
+<line x1="230" y1="185" x2="350" y2="120"/>
+<line x1="230" y1="185" x2="350" y2="230"/>
+<line x1="230" y1="185" x2="350" y2="340"/>
+<line x1="230" y1="185" x2="350" y2="450"/>
+<line x1="230" y1="275" x2="350" y2="120"/>
+<line x1="230" y1="275" x2="350" y2="230"/>
+<line x1="230" y1="275" x2="350" y2="340"/>
+<line x1="230" y1="275" x2="350" y2="450"/>
+<line x1="230" y1="365" x2="350" y2="120"/>
+<line x1="230" y1="365" x2="350" y2="230"/>
+<line x1="230" y1="365" x2="350" y2="340"/>
+<line x1="230" y1="365" x2="350" y2="450"/>
+<line x1="230" y1="455" x2="350" y2="120"/>
+<line x1="230" y1="455" x2="350" y2="230"/>
+<line x1="230" y1="455" x2="350" y2="340"/>
+<line x1="230" y1="455" x2="350" y2="450"/>
+</g><g stroke="#6F8CA8" stroke-width="1.6" opacity="0.8">
+<line x1="540" y1="120" x2="620" y2="285"/>
+<line x1="540" y1="230" x2="620" y2="285"/>
+<line x1="540" y1="340" x2="620" y2="285"/>
+<line x1="540" y1="450" x2="620" y2="285"/>
+</g><g stroke="#C49A3A" stroke-width="1.8" opacity="0.85">
+<line x1="810" y1="285" x2="930" y2="120"/>
+<line x1="810" y1="285" x2="930" y2="230"/>
+<line x1="810" y1="285" x2="930" y2="340"/>
+<line x1="810" y1="285" x2="930" y2="450"/>
+</g>
+<rect x="20" y="69" width="210" height="52" rx="6" fill="#1F2630" stroke="#C49A3A" stroke-width="1.6"/><text class="t1" x="125" y="92" text-anchor="middle">Delhi Supply Base</text><text class="t2" x="125" y="109" text-anchor="middle">capacity 150 kits/wk</text>
+<rect x="20" y="159" width="210" height="52" rx="6" fill="#1F2630" stroke="#C49A3A" stroke-width="1.6"/><text class="t1" x="125" y="182" text-anchor="middle">Chandigarh Supply Base</text><text class="t2" x="125" y="199" text-anchor="middle">capacity 180 kits/wk</text>
+<rect x="20" y="249" width="210" height="52" rx="6" fill="#1F2630" stroke="#C49A3A" stroke-width="1.6"/><text class="t1" x="125" y="272" text-anchor="middle">Ambala Supply Base</text><text class="t2" x="125" y="289" text-anchor="middle">capacity 200 kits/wk</text>
+<rect x="20" y="339" width="210" height="52" rx="6" fill="#1F2630" stroke="#C49A3A" stroke-width="1.6"/><text class="t1" x="125" y="362" text-anchor="middle">Ludhiana Supply Base</text><text class="t2" x="125" y="379" text-anchor="middle">capacity 220 kits/wk</text>
+<rect x="20" y="429" width="210" height="52" rx="6" fill="#1F2630" stroke="#C49A3A" stroke-width="1.6"/><text class="t1" x="125" y="452" text-anchor="middle">Jalandhar Supply Base</text><text class="t2" x="125" y="469" text-anchor="middle">capacity 250 kits/wk</text>
+<rect x="350" y="94" width="190" height="52" rx="6" fill="#1B2A3A" stroke="#6F8CA8" stroke-width="1.6"/><text class="t1" x="445" y="117" text-anchor="middle">Jammu Camp</text><text class="t2" x="445" y="134" text-anchor="middle">x = 0, y = 200</text>
+<rect x="350" y="204" width="190" height="52" rx="6" fill="#1B2A3A" stroke="#6F8CA8" stroke-width="1.6"/><text class="t1" x="445" y="227" text-anchor="middle">Udhampur Camp</text><text class="t2" x="445" y="244" text-anchor="middle">x = 0, y = 100</text>
+<rect x="350" y="314" width="190" height="52" rx="6" fill="#1B2A3A" stroke="#6F8CA8" stroke-width="1.6"/><text class="t1" x="445" y="337" text-anchor="middle">Banihal Camp</text><text class="t2" x="445" y="354" text-anchor="middle">x = 0, y = 50</text>
+<rect x="350" y="424" width="190" height="52" rx="6" fill="#1B2A3A" stroke="#6F8CA8" stroke-width="1.6"/><text class="t1" x="445" y="447" text-anchor="middle">Anantnag Camp</text><text class="t2" x="445" y="464" text-anchor="middle">x = 0, y = 0</text>
+<rect x="620" y="255" width="190" height="60" rx="6" fill="#7A2A30" stroke="#E07A80" stroke-width="1.6"/><text class="t1" x="715" y="282" text-anchor="middle">Srinagar DC</text><text class="t2" x="715" y="299" text-anchor="middle">x = 150, y = 100</text>
+<rect x="930" y="94" width="200" height="52" rx="6" fill="#16301F" stroke="#6FBF8A" stroke-width="1.6"/><text class="t1" x="1030" y="117" text-anchor="middle">Dras Hub</text><text class="t2" x="1030" y="134" text-anchor="middle">x = 300, y = 200</text>
+<rect x="930" y="204" width="200" height="52" rx="6" fill="#16301F" stroke="#6FBF8A" stroke-width="1.6"/><text class="t1" x="1030" y="227" text-anchor="middle">Mushkoh Hub</text><text class="t2" x="1030" y="244" text-anchor="middle">x = 300, y = 100</text>
+<rect x="930" y="314" width="200" height="52" rx="6" fill="#16301F" stroke="#6FBF8A" stroke-width="1.6"/><text class="t1" x="1030" y="337" text-anchor="middle">Kaksar Hub</text><text class="t2" x="1030" y="354" text-anchor="middle">x = 300, y = 50</text>
+<rect x="930" y="424" width="200" height="52" rx="6" fill="#16301F" stroke="#6FBF8A" stroke-width="1.6"/><text class="t1" x="1030" y="447" text-anchor="middle">Batalik Hub</text><text class="t2" x="1030" y="464" text-anchor="middle">x = 300, y = 0</text>
+<line x1="40" y1="505" x2="1110" y2="505" stroke="#46535F"/>
+<line x1="445" y1="498" x2="445" y2="512" stroke="#46535F"/><text class="t2" x="445" y="530" text-anchor="middle">x = 0 km</text>
+<line x1="715" y1="498" x2="715" y2="512" stroke="#46535F"/><text class="t2" x="715" y="530" text-anchor="middle">x = 150 km</text>
+<line x1="1030" y1="498" x2="1030" y2="512" stroke="#46535F"/><text class="t2" x="1030" y="530" text-anchor="middle">x = 300 km</text>
+<text class="t2" x="125" y="530" text-anchor="middle">plains depots</text>
+</svg>
+    <p style="font-size:12.5px; color:#9DA7B0;">Every supply base can ship to every assembly camp (20 routes). All four camps feed Srinagar DC, which forwards to the four front-line hubs. Coordinates are in km: camps at x = 0, Srinagar DC at x = 150, hubs at x = 300.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge">Fixed Data — Both Legs</span>
+    <table>
+      <tr><th>Weekly demand</th><td>100 kits of each type, at each front-line hub</td>
+          <th>Convoy capacity</th><td>400 kits per shipment</td></tr>
+      <tr><th>Priority Combat Kit value</th><td>Rs 200 / kit</td>
+          <th>Standard Ration Kit value</th><td>Rs 75 / kit</td></tr>
+      <tr><th>Inventory Carrying Cost</th><td>20% p.a.</td>
+          <th>Tariff rate</th><td>Rs 2 / km</td></tr>
+      <tr><th>Annual DC facility cost</th><td>Rs 15,000 (Via Srinagar DC only)</td>
+          <th>Assembly camp requirement</th><td>250 units / week each (1000 total)</td></tr>
+      <tr><th>Lean takt time</th><td>36 sec/kit during normal demand</td>
+          <th>WIP cap between stages</th><td>450 kits unless an event overrides it</td></tr>
+      <tr><th>Quality target</th><td>≥ 98.5% first-pass yield</td>
+          <th>Service target</th><td>Priority ≥ 99%; Standard ≥ 95%</td></tr>
+      <tr><th>Supply container</th><td>50 kits/container</td>
+          <th>Safety-stock review</th><td>Weekly; service-factor supplied in event</td></tr>
+      <tr><th>Retailer-side carrying cost</th><td>25% p.a. on stock held at the assembly camps (retailer side)</td>
+          <th>Camp stock rule</th><td>Average camp stock = &frac12; week of requirement, valued at landed cost</td></tr>
+    </table>
+  </div>
+
+  <div id="syncModeBanner"></div>
+  <div class="flag info">Read the <b>Sourcing</b> and <b>Distribution</b> tabs for the base data. Later rounds deliberately reveal additional information. Start typing or interacting anywhere to begin the <b>60-minute</b> challenge timer.<br><b>Scoring:</b> numeric answers earn full marks when accurate (within ±1%). Otherwise marks fall in proportion to how far the answer is from the correct value, reaching zero at ±25% deviation — a close answer still earns most of the marks.</div>
+</section>
+
+<!-- ================= SOURCING TAB ================= -->
+<section id="tab-sourcing" style="display:none;">
+  <div class="round-banner"><div><div class="round-number">ROUND 1 · SUPPLY LINES</div><h2 style="margin:3px 0 0;">Secure 1,000 kits before the clock moves.</h2></div><b class="mono" style="color:#F2D68A;">+ 25 POINTS</b></div>
+  <div class="card accent">
+    <span class="badge thread">ROUND 1 · SUPPLY LINES</span>
+    <h2>Secure the supply lines before the convoy moves.</h2>
+    <p>Each assembly camp needs exactly <b>250 kits/week</b>. Five supply bases have quoted, each capped at a limited weekly capacity — for example, Delhi Supply Base can allot no more than <b>150 kits/week</b> across all camps combined. A supply base may serve more than one camp, and a camp may be split across supply bases, but no supply base may exceed its quoted weekly capacity.</p>
+    <p>Decide the cheapest feasible allocation using the price, capacity and route-distance data below. Total weekly landed cost = price + freight <b>plus the retailer-side carrying cost</b> of 25% p.a. on the average stock each camp holds (half a week of its requirement, valued at landed cost). The tariff rate and convoy capacity for this leg are in the Fixed Data table on the Command Brief. <b>Note:</b> the five quoted capacities add up to exactly 1,000 kits/week — the total the camps need — so a feasible plan uses every supply base at its full quoted capacity; none can be left partly idle.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge">Supply Base Data (Capacities in kits/week)</span>
+    <table id="supplierRefTable"></table>
+  </div>
+
+  <div class="card">
+    <span class="badge gold">Your Supply Allocation Worksheet</span>
+    <p style="font-size:13px;">Enter how many kits/week each supplier ships to each plant. Camp totals must equal 250; row totals must not exceed supply-base capacity.</p>
+    <table id="sourcingTable"></table>
+    <div id="sourcingFeasibility"></div>
+    <div style="margin-top:12px; display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+      <div class="score-pill"><span class="label" style="display:block;">Total Weekly Landed Cost</span>Rs <span id="sourcingTotalCost">0</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DISTRIBUTION TAB ================= -->
+<section id="tab-distribution" style="display:none;">
+  <div class="round-banner"><div><div class="round-number">ROUND 2 · CONVOY COMMAND</div><h2 style="margin:3px 0 0;">Build the cheapest normal-weather plan.</h2></div><b class="mono" style="color:#F2D68A;">+ 25 POINTS</b></div>
+  <div class="card accent">
+    <span class="badge thread">ROUND 2 · CONVOY COMMAND</span>
+    <h2>Build the cheapest convoy plan — then survive the disruption.</h2>
+    <p>Enter your calculated figures for transport cost, average inventory, inventory carrying cost, and total cost for the Priority Combat Kit and Standard Ration Kit.</p>
+    <div class="flag info"><b>Convoy capacity:</b> 400 units per shipment. The Round 1 supply allocation worksheet automatically recalculates every supplier row total, each camp column total, the grand total, and the required total whenever an allocation changes.</div>
+  </div>
+
+  <div id="methodCards"></div>
+
+  <div class="card">
+    <span class="badge">Comparison &amp; Recommendation</span>
+    <p style="font-size:13px;">Use your calculated Total Cost figures to make your recommendation below.</p>
+    <div class="grid2">
+      <div>
+        <label style="font-weight:600; font-size:13.5px;">Best convoy for the <b>Priority Combat Kit (Rs 200)</b>:</label>
+        <select id="reco200">
+          <option value="">— choose —</option>
+          <option value="direct">Direct Convoy</option>
+          <option value="milkrun">Milk-Run Convoy</option>
+          <option value="viadc">Via Srinagar DC</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-weight:600; font-size:13.5px;">Best convoy for the <b>Standard Ration Kit (Rs 75)</b>:</label>
+        <select id="reco75">
+          <option value="">— choose —</option>
+          <option value="direct">Direct Convoy</option>
+          <option value="milkrun">Milk-Run Convoy</option>
+          <option value="viadc">Via Srinagar DC</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ROUND 3 ================= -->
+<section id="tab-crisis" style="display:none;">
+  <div class="round-banner"><div><div class="round-number">ROUND 3 · THE AMBUSH</div><h2 style="margin:3px 0 0;">Your planned route has been hit — twice.</h2></div><b class="mono" style="color:#F2D68A;">+ 25 POINTS</b></div>
+  <div class="progress-strip"><div>1 · Supply secured</div><div>2 · Convoy planned</div><div class="live">3 · ROUTE DISRUPTED</div><div>4 · Final dispatch</div></div>
+
+  <div class="card event-card">
+    <span class="badge gold">FLASH ORDER · 08:40 HOURS</span>
+    <p class="mission"><b>Bridge Shelled + Battle Surge:</b> the Northern Route is closed for the next dispatch window, and the field hospital has just raised its Priority Combat Kit requirement. You must now move <b>380 kits</b> in this single dispatch window — no single convoy route can carry that alone.</p>
+    <div class="impact-grid">
+      <div class="impact"><strong>DIRECT</strong>6,200 km → <b>7,400 km</b> diversion. A narrow Bailey bridge on the diversion caps it at <b>350 kits</b> per convoy.</div>
+      <div class="impact"><strong>MILK-RUN</strong>2,800 km, capped at <b>300 kits</b> per convoy.</div>
+      <div class="impact"><strong>SRINAGAR DC</strong>2,200 km. Handling cost rises Rs 15,000 → <b>Rs 19,000</b>.</div>
+    </div>
+  </div>
+
+  <div class="card event-card" style="border-color:#8a5a3a;">
+    <span class="badge" style="background:#3a2418;color:#e0a75e;border-color:#8a5a3a;">SECOND FLASH · 09:15 HOURS</span>
+    <p class="mission"><b>The situation escalates.</b> Two more complications land while your convoy is still forming:</p>
+    <div class="impact-grid">
+      <div class="impact"><strong>DIRECT</strong>The diversion road now needs an armed escort (snipers and artillery fire): flat <b>+Rs 6,000</b> security fee if you use this route at all, regardless of load size.</div>
+      <div class="impact"><strong>SRINAGAR DC</strong>Landslides and flash floods near Zojila have cut downstream throughput: it can now only forward <b>250 kits</b> (not more, even under the higher handling cost).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge">Emergency Recalculation — Split Dispatch</span>
+    <p>No single route can move 380 kits under its cap, so you must split the dispatch across two or more routes. Every route you use costs money differently: distance-based freight, plus a flat fee for Direct (escort) or Via DC (handling) if that route is used at all — regardless of how many kits it carries. The distance, cap and flat fee for each route are listed above. Decide the split, then calculate the real cost.</p>
+    <div class="grid2">
+      <div><label>Kits via Direct Convoy (cap 350)</label><input id="crisisDirectQty" type="number" min="0" max="350" step="10"></div>
+      <div><label>Kits via Milk-Run Convoy (cap 300)</label><input id="crisisMilkrunQty" type="number" min="0" max="300" step="10"></div>
+      <div><label>Kits via Srinagar DC (cap 250)</label><input id="crisisViadcQty" type="number" min="0" max="250" step="10"></div>
+      <div><label>Total freight cost, all routes used (Rs)</label><input id="crisisTransportTotal" type="number" min="0"></div>
+      <div style="grid-column:1 / -1;"><label>Grand total emergency cost — freight + flat fees (Rs)</label><input id="crisisGrandTotal" type="number" min="0"></div>
+    </div>
+    <div id="crisisFeedback"></div>
+  </div>
+</section>
+
+<!-- ================= ROUND 4 · FLOW CONTROL ================= -->
+<section id="tab-flow" style="display:none;">
+  <div class="round-banner"><div><div class="round-number">ROUND 4 · FLOW CONTROL</div><h2 style="margin:3px 0 0;">The Srinagar DC queue is backing up. Release it without breaking flow.</h2></div><b class="mono" style="color:#F2D68A;">+ 15 POINTS</b></div>
+  <div class="progress-strip">
+    <div>1 · Supply secured</div><div>2 · Convoy planned</div><div>3 · Route disrupted</div>
+    <div class="live">4 · DC QUEUE LIVE</div><div>Final lock pending</div><div>Board pending</div>
+  </div>
+
+  <div class="card event-card">
+    <span class="badge gold">DC QUEUE · 09:40 HOURS</span>
+    <p class="mission"><b>Seven convoy batches are now queued at Srinagar DC</b>, waiting for release to the front-line hubs. Srinagar DC can only release a limited volume per dispatch window, so the release <b>order</b> matters as much as the release volume — a mis-sequenced release either strands a medically critical batch, blows a cold-chain window, or floods the network with an oversized lot. The DC also runs one physical line: switching from Priority Combat kits to Standard Ration kits (or back) costs a changeover, so grouping batches by type is worth something too — provided it doesn't come at the cost of priority.</p>
+    <table>
+      <tr><th>Batch</th><th>Kit Type</th><th class="num">Kits</th><th>Destination Hub</th><th>Arrived at DC</th><th>Status</th></tr>
+      <tr><td>F1</td><td>Priority Combat</td><td class="num">60</td><td>Dras Hub</td><td>08:10</td><td>Medically critical</td></tr>
+      <tr><td>F2</td><td>Standard Ration</td><td class="num">140</td><td>Mushkoh Hub</td><td>07:40</td><td>Routine</td></tr>
+      <tr><td>F3</td><td>Priority Combat</td><td class="num">90</td><td>Kaksar Hub</td><td>08:25</td><td>Medically critical</td></tr>
+      <tr><td>F4</td><td>Standard Ration</td><td class="num">200</td><td>Batalik Hub</td><td>07:55</td><td>Routine</td></tr>
+      <tr><td>F5</td><td>Priority Combat</td><td class="num">40</td><td>Dras Hub</td><td>08:30</td><td>Medically critical</td></tr>
+      <tr><td>F6</td><td>Standard Ration</td><td class="num">110</td><td>Mushkoh Hub</td><td>08:05</td><td>Quality hold — pending inspection clearance</td></tr>
+      <tr><td>F7</td><td>Priority Combat</td><td class="num">70</td><td>Kaksar Hub</td><td>08:45</td><td>Plasma cold-chain — must release within 60 min of arrival</td></tr>
+    </table>
+  </div>
+
+  <div class="card event-card" style="border-color:#2f6e63;">
+    <span class="badge" style="background:#132523;color:#7fd9c4;border-color:#2f6e63;">SECOND FLASH · 10:05 HOURS</span>
+    <p class="mission"><b>The queue gets harder to read.</b> Two things land while your release decisions are still open:</p>
+    <div class="impact-grid">
+      <div class="impact"><strong>QUALITY HOLD</strong>Inspectors flag a defect cluster inside Batch F6. The extra changeover adds <b>15 min</b> of downtime (40 → <b>55 min</b>) and Command tightens the WIP cap between stages from 450 kits to <b>400 kits</b> — temporarily overriding the standard cap.</div>
+      <div class="impact"><strong>SANITIZATION PASS</strong>Because F6 is under hold, the line must now be fully sanitized on every type switch. Changeover time per switch rises from <b>8 min to 15 min</b> for the rest of this window.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge">Release Sequencing</span>
+    <p style="font-size:13px;">Give every batch a release position, 1st through 7th. Each position is used exactly once — there is no formula for this, it is a judgment call built on the data above, including the Second Flash.</p>
+    <div class="grid2" id="flowSeqGrid"></div>
+    <div id="flowSeqFeedback"></div>
+  </div>
+
+  <div class="card">
+    <span class="badge">DC Performance Log — Before the Hold</span>
+    <table>
+      <tr><th>Planned operating time</th><td>480 min</td><th>Downtime (changeover + breakdowns)</th><td>40 min</td></tr>
+      <tr><th>Ideal cycle time</th><td>36 sec/kit</td><th>Total kits started</th><td>700</td></tr>
+      <tr><th>Good kits (passed inspection)</th><td>658</td><th>WIP cap between stages</th><td>450 kits</td></tr>
+      <tr><th>Container size</th><td>50 kits/container</td><th>Downstream hub demand</th><td>500 kits / 10-hr day</td></tr>
+      <tr><th>Changeover time per type switch</th><td>8 min</td><th>Kit types in this queue</th><td>Priority Combat / Standard Ration</td></tr>
+    </table>
+    <div class="grid2" style="margin-top:12px;">
+      <div><label>Containers needed to cover the 450-kit WIP cap</label><input id="flowCtn" type="number" step="0.01"></div>
+      <div><label>Average flow time in the WIP pool before the hold (hours)</label><input id="flowTime" type="number" step="0.01"></div>
+      <div><label>Total changeover time for <b>your own sequence</b> above, before the hold (min) — count each type switch × 8 min</label><input id="flowChangeover" type="number" step="0.01"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge gold">DC Performance Log — After the Hold</span>
+    <p style="font-size:13px;">After the Second Flash: downtime is up, the WIP cap is down, changeovers cost more, and fewer kits made it into this window at all.</p>
+    <table>
+      <tr><th>Planned operating time</th><td>480 min</td><th>Downtime (after the hold)</th><td>55 min</td></tr>
+      <tr><th>Ideal cycle time</th><td>36 sec/kit</td><th>Total kits started (after the hold)</th><td>640</td></tr>
+      <tr><th>Good kits passed inspection (after the hold)</th><td>601</td><th>WIP cap between stages (after the hold)</th><td>400 kits</td></tr>
+      <tr><th>Container size</th><td>50 kits/container</td><th>Downstream hub demand</th><td>500 kits / 10-hr day</td></tr>
+      <tr><th>Changeover time per type switch (after the hold)</th><td>15 min</td><th>Kit types in this queue</th><td>Priority Combat / Standard Ration</td></tr>
+    </table>
+    <div class="grid2" style="margin-top:12px;">
+      <div><label>Containers needed to cover the reduced 400-kit WIP cap</label><input id="flowCtn2" type="number" step="0.01"></div>
+      <div><label>Average flow time in the WIP pool after the hold (hours)</label><input id="flowTime2" type="number" step="0.01"></div>
+      <div><label>Total changeover time for <b>your own sequence</b> above, after the hold (min) — count each type switch × 15 min</label><input id="flowChangeover2" type="number" step="0.01"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge">Takt Time &amp; Bottleneck Check</span>
+    <p style="font-size:13px;">Downstream hubs still need 500 kits every 10-hour day, no matter what happened at the DC this morning. Work out the pace that requires, then judge whether today's DC can hold it.</p>
+    <div class="grid2">
+      <div><label>Takt time required to meet downstream demand (sec/kit)</label><input id="flowTakt" type="number" step="0.01"></div>
+      <div><label>Is the DC currently the bottleneck relative to downstream demand?</label>
+        <select id="flowBottleneck">
+          <option value="">— choose —</option>
+          <option value="bottleneck">DC is the bottleneck — running slower than takt</option>
+          <option value="spare">DC has spare capacity — running faster than takt</option>
+          <option value="exact">DC is running exactly at takt</option>
+        </select>
+      </div>
+    </div>
+    <div id="flowNumFeedback"></div>
+  </div>
+</section>
+
+<!-- ================= SUBMIT TAB ================= -->
+<section id="tab-submit" style="display:none;">
+  <div class="round-banner"><div><div class="round-number">FINAL LOCK · COMMAND REVIEW</div><h2 style="margin:3px 0 0;">Lock the operation and transmit your result.</h2></div><b class="mono" style="color:#F2D68A;">100 POINTS TOTAL</b></div>
+  <div class="card accent">
+    <span class="badge thread">MISSION COMPLETE</span>
+    <h2>One network. Four rounds. No reset.</h2>
+    <p>Every decision changes the next step. Review the entire chain before locking the operation. The Final Lock captures your supply plan, convoy economics, disruption response and flow-control sequencing.</p>
+    <div class="impact-grid">
+      <div class="impact"><strong>R1</strong>Supply · 25</div>
+      <div class="impact"><strong>R2</strong>Convoy · 25</div>
+      <div class="impact"><strong>R3</strong>Ambush · 25</div>
+    </div>
+    <div class="impact-grid" style="margin-top:12px;">
+      <div class="impact"><strong>R4</strong>Flow Control · 15</div>
+      <div class="impact"><strong>SPEED</strong>10</div>
+      <div class="impact"><strong>TOTAL</strong>100 maximum</div>
+    </div>
+  </div>
+  <div class="card"><span class="badge">Final Mission Read-back</span><table id="reviewTable"></table></div>
+  <div class="card">
+    <div id="submitArea"><button class="btn gold" id="submitBtn" style="font-size:15px;padding:12px 22px;">LOCK OPERATION &amp; SUBMIT</button><p style="font-size:12.5px;color:#9DA7B0;margin-top:8px;">Submitting locks all rounds for this team.</p></div>
+    <div id="submittedMsg" style="display:none;" class="flag ok"></div>
+    <div id="resultCodeArea" style="display:none;margin-top:14px;"><label style="font-weight:600;font-size:13px;">Result Code — send this to facilitator:</label><textarea id="resultCodeBox" readonly style="min-height:70px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;"></textarea><div style="display:flex;gap:10px;margin-top:8px;"><button class="btn small" id="copyResultCodeBtn">Copy Code</button><a id="downloadResultLink" class="btn small secondary" download="result.json" style="text-decoration:none;">Download as File</a></div></div>
+  </div>
+</section>
+
+<!-- ================= SCOREBOARD TAB ================= -->
+<section id="tab-scoreboard" style="display:none;">
+  <div class="round-banner"><div><div class="round-number">COMMAND BOARD · FACILITATOR</div><h2 style="margin:3px 0 0;">Team results, ranking and score control.</h2></div><b class="mono" style="color:#F2D68A;">100 POINTS</b></div>
+  <div class="card accent">
+    <span class="badge thread">COMMAND BOARD</span>
+    <h2>War of Supply — Command Scores</h2>
+    <p style="font-size:13px;">Unlock facilitator mode to view submitted teams, import Result Codes, rank teams, inspect score components, and reset the board.</p>
+    <div class="impact-grid" style="margin-top:12px;">
+      <div class="impact"><strong>STEP 1</strong>Teams complete all four rounds.</div>
+      <div class="impact"><strong>STEP 2</strong>Final Lock generates a Result Code.</div>
+      <div class="impact"><strong>STEP 3</strong>Facilitator imports the code here.</div>
+    </div>
+  </div>
+  <div class="card" id="facLoginArea">
+    <span class="badge gold">Facilitator Access</span>
+    <p style="font-size:13px;margin-top:8px;">Enter the event passcode to open the live Command Board.</p>
+    <input type="password" id="judgePasscode" placeholder="Event passcode" style="max-width:220px; display:inline-block;">
+    <button class="btn small" id="judgeLoginBtn">Unlock Facilitator Mode</button>
+  </div>
+
+  <div id="facPanel" style="display:none;">
+    <div class="card">
+      <span class="badge">Master Board</span>
+      <p style="font-size:13px;">Manage all team submissions.</p>
+      <button class="btn secondary" id="refreshBoardBtn">Refresh Now</button>
+    </div>
+
+    <div class="card" id="importCodeCard">
+      <span class="badge gold">Add a Team's Result</span>
+      <p style="font-size:13px;">Paste the Result Code generated by Final Lock.</p>
+      <textarea id="importCodeBox" placeholder="Paste Result Code here…" style="min-height:60px; font-family:'IBM Plex Mono',monospace; font-size:11.5px;"></textarea>
+      <button class="btn small" id="importCodeBtn" style="margin-top:8px;">Add to Board</button>
+      <span id="importCodeMsg" style="margin-left:10px; font-size:13px;"></span>
+    </div>
+
+    <div class="card" style="padding:0;">
+      <div class="leaderboard-row head">
+        <div>#</div><div>Team</div><div style="text-align:right;">Score</div><div style="text-align:right;">Final</div><div style="text-align:center;">Action</div>
+      </div>
+      <div id="leaderboardBody"></div>
+    </div>
+
+    <div class="card">
+      <span class="badge">Update a Team's Score</span>
+      <label style="font-weight:600; font-size:13px;">Select team</label>
+      <select id="judgeTeamSelect"></select>
+      <div class="grid2">
+        <div>
+          <label style="font-weight:600; font-size:13px;">Auto score override</label>
+          <input type="number" id="autoScoreOverrideInput" min="0" max="100">
+        </div>
+        <div>
+          <label style="font-weight:600; font-size:13px;">Judge score</label>
+          <input type="number" id="judgeScoreInput" min="0" max="0" value="0" disabled>
+        </div>
+      </div>
+      <button class="btn" id="judgeSaveBtn" style="margin-top:10px;">Save Score</button>
+      <details class="hint" style="margin-top:12px;" open>
+        <summary>View answers — team entries vs correct answers</summary>
+        <div id="teamDetailBox" style="margin-top:10px;"></div>
+      </details>
+      <hr style="margin:18px 0; border-color:var(--line);">
+      <button class="btn secondary" id="resetAllBtn" style="border-color:var(--thread); color:var(--thread);">Reset ALL Scores…</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+
+/* In-page notices (the viewer blocks alert/confirm/prompt) */
+function notify(msg){
+  let t=document.getElementById('wosToast');
+  if(!t){ t=document.createElement('div'); t.id='wosToast'; t.setAttribute('role','status'); document.body.appendChild(t); }
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(notify._t); notify._t=setTimeout(()=>t.classList.remove('show'),5000);
+}
+const _confirmPending={};
+function confirmTwice(id,msg){
+  if(_confirmPending[id]){ clearTimeout(_confirmPending[id]); delete _confirmPending[id]; return true; }
+  notify(msg);
+  _confirmPending[id]=setTimeout(()=>{ delete _confirmPending[id]; },6000);
+  return false;
+}
+
+/* ============================================================
+   DATA & MASTER KEY (Expanded to 4 Camps & 4 Markets)
+============================================================ */
+const SUPPLIERS = [
+  {id:'S_A', name:'Delhi Supply Base', price:40, cap:150, dist:{A:300,B:316,C:361,D:400}},
+  {id:'S_B', name:'Chandigarh Supply Base', price:38, cap:180, dist:{A:316,B:300,C:316,D:380}},
+  {id:'S_C', name:'Ambala Supply Base', price:36, cap:200, dist:{A:361,B:316,C:300,D:340}},
+  {id:'S_D', name:'Ludhiana Supply Base', price:34, cap:220, dist:{A:255,B:200,C:255,D:300}},
+  {id:'S_E', name:'Jalandhar Supply Base',   price:22, cap:250, dist:{A:420,B:380,C:340,D:310}},
+];
+const PLANTS = ['A','B','C','D'];
+const CAMP_NAMES = {A:'Jammu Camp', B:'Udhampur Camp', C:'Banihal Camp', D:'Anantnag Camp'};
+const HUB_NAMES  = {W:'Dras Hub', X:'Mushkoh Hub', Y:'Kaksar Hub', Z:'Batalik Hub'};
+const SUPPLIER_NAMES = {S_A:'Delhi Supply Base', S_B:'Chandigarh Supply Base', S_C:'Ambala Supply Base', S_D:'Ludhiana Supply Base', S_E:'Jalandhar Supply Base'};
+const DC_NAME = 'Srinagar DC';
+const PLANT_REQ = 250;
+const TARIFF = 2;
+const CAMP_CARRY_RATE = 0.25;   // retailer-side (camp) carrying cost, p.a.
+const CONTAINER = 400;
+// Caps now sum to exactly 1000 (= total demand), so this is a balanced transportation
+// problem: every supply base's full quoted capacity must be used in the optimal plan.
+const SOURCING_OPTIMAL = 35935.18;
+
+function landedCost(sup, plant){
+  const d = sup.dist[plant];
+  return sup.price + (d*2*TARIFF)/CONTAINER;
+}
+
+const METHODS = {
+  // Direct Convoy ships once every 4 weeks in the current scenario.
+  // Distances = answer-key workings (round-trip km per shipment cycle):
+  //   Direct 10146.79 · Milk-run 3554.414 · Srinagar DC 2674.676
+  direct:  {label:'Direct Convoy', distance:10146.79, dcCost:0,     correctFreq:4},
+  milkrun: {label:'Milk-Run Convoy',        distance:3554.414, dcCost:0,     correctFreq:1},
+  viadc:   {label:'Via Srinagar DC',          distance:2674.676, dcCost:15000, correctFreq:1},
+};
+const ICC_RATE = 0.20;
+const PRICE_200 = 200, PRICE_75 = 75;
+const AVG_INV_KEY = {direct:3200, milkrun:800, viadc:800};
+function avgInventory(key){ return AVG_INV_KEY[key]; }
+function transportCost(dist,n){ return dist*TARIFF*(52/n); }
+function iccCost(key, price){ return avgInventory(key)*price*ICC_RATE; }
+function totalCost(dist,n,dcCost,price,key){ return transportCost(dist,n)+dcCost+iccCost(key,price); }
+function bestMethod(price){ let best=null,bv=Infinity; Object.keys(METHODS).forEach(k=>{ const t=trueMasterValues(k)[price===200?'total200':'total75']; if(t<bv){bv=t;best=k;} }); return best; }
+const CORRECT_RECO = {p200:bestMethod(200), p75:bestMethod(75)};
+
+const JUDGE_PASSCODE = 'leanops2026';
+let TOTAL_MINUTES = 60;
+
+/* ============================================================
+   STATE
+============================================================ */
+let teamName = null;
+let teamKey = null;
+let timerInterval = null;
+let secondsLeft = TOTAL_MINUTES*60;
+let timerRunning = false;
+let submitted = false;
+let facUnlocked = false;
+
+let sourcingAlloc = {}; 
+SUPPLIERS.forEach(s=>{ sourcingAlloc[s.id] = {A:0,B:0,C:0,D:0}; });
+
+let freqSel = {direct:'', milkrun:'', viadc:''};
+let calcInputs = {};
+Object.keys(METHODS).forEach(k=>{ calcInputs[k] = {transport:'', avgInv:'', icc200:'', total200:'', icc75:'', total75:''}; });
+let twistSel = {twist1:'', twist2:'', twist3:''};
+let crisisData = {directQty:'',milkrunQty:'',viadcQty:'',transportTotal:'',grandTotal:''};
+const CRISIS = {
+  demand: 380,
+  direct:  {distance:7400, cap:350, flatFee:6000},
+  milkrun: {distance:2800, cap:300, flatFee:0},
+  viadc:   {distance:2200, cap:250, flatFee:19000}
+};
+function crisisFreight(dist,qty){ return qty>0 ? dist*TARIFF*Math.ceil(qty/400) : 0; }
+function crisisTrueBreakdown(dQty,mQty,vQty){
+  const freight = crisisFreight(CRISIS.direct.distance,dQty)+crisisFreight(CRISIS.milkrun.distance,mQty)+crisisFreight(CRISIS.viadc.distance,vQty);
+  const fees = (dQty>0?CRISIS.direct.flatFee:0)+(vQty>0?CRISIS.viadc.flatFee:0);
+  return {freight, fees, total:freight+fees};
+}
+// true minimum achievable grand total for the 380-kit split (Milk-Run 300 + Direct 80, avoiding Via DC's flat fee)
+const CRISIS_TRUE_MIN = crisisTrueBreakdown(80,300,0).total;
+const CRISIS_BEST_SPLIT = {direct:80, milkrun:300, viadc:0};
+// Reference cost-optimal Round 1 plan (rows S_A..S_E, columns A..D). Any plan with the same total cost is equally correct.
+const SOURCING_REF_ALLOC = {
+  S_A:{A:150,B:0,C:0,D:0},
+  S_B:{A:100,B:30,C:50,D:0},
+  S_C:{A:0,B:0,C:200,D:0},
+  S_D:{A:0,B:220,C:0,D:0},
+  S_E:{A:0,B:0,C:0,D:250}
+};
+let finalData = {rapidW:'',rapidY:'',stdW:'',stdY:'',method:'',cost:''};
+let round5Data = {seq:{F1:'',F2:'',F3:'',F4:'',F5:'',F6:'',F7:''}, ctn:'', flowTime:'', changeover:'', ctn2:'', flowTime2:'', changeover2:'', takt:'', bottleneck:''};
+const CALC_FIELDS = ['transport','avgInv','icc200','total200','icc75','total75'];
+
+function slug(s){ return s.trim().toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g, '') || 'team'; }
+
+/* ============================================================
+   AUTO-START TIMER ON INTERACTION
+============================================================ */
+function startTimerOnce(){
+  if(submitted) return;
+  if(secondsLeft<=0){ autoSubmitOnTimeout(); return; }
+  if(!timerRunning){
+    timerRunning = true;
+    timerInterval = setInterval(()=>{
+      if(secondsLeft>0){
+        secondsLeft--; updateClockDisplay(); scheduleSave();
+        if(secondsLeft<=0){ clearInterval(timerInterval); timerRunning=false; autoSubmitOnTimeout(); }
+      } else {
+        clearInterval(timerInterval); timerRunning=false; autoSubmitOnTimeout();
+      }
+    },1000);
+  }
+}
+
+/* Time's up: lock the game exactly where it stands and save/submit automatically. */
+function lockAllInputs(){
+  ['tab-sourcing','tab-distribution','tab-crisis','tab-flow'].forEach(id=>{
+    const sec=document.getElementById(id); if(!sec) return;
+    sec.querySelectorAll('input, select, textarea').forEach(el=>{ el.disabled = true; });
+  });
+  const sb=document.getElementById('submitBtn'); if(sb) sb.disabled = true;
+}
+async function autoSubmitOnTimeout(){
+  if(submitted || !teamKey) return;
+  const r=computeSourcing();
+  const b=autoScoreBreakdown();
+  const record={teamName,submittedAt:Date.now(),sourcingAlloc,sourcingTotal:r.total,sourcingFeasible:r.feasible,freqSel,calcInputs,crisisData,finalData,round5Data,reco200:document.getElementById('reco200').value,reco75:document.getElementById('reco75').value,twistSel,autoScore:b,judgeScore:0,autoSubmittedByTimer:true};
+  await persistRecord(teamKey,record,true);
+  submitted = true;
+  showSubmittedState(record);
+  lockAllInputs();
+}
+
+/* ============================================================
+   TABS
+============================================================ */
+document.getElementById('tabNav').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-tab]');
+  if(!btn) return;
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['brief','sourcing','distribution','crisis','flow','submit','scoreboard'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = (t===btn.dataset.tab) ? '' : 'none';
+  });
+  if(btn.dataset.tab==='scoreboard' && facUnlocked) refreshLeaderboard();
+  if(btn.dataset.tab==='submit') renderReviewTable();
+});
+
+/* ============================================================
+   STORAGE LAYER
+============================================================ */
+const HAS_CLOUD = (typeof window.storage !== 'undefined' && window.storage !== null);
+const LS_PREFIX = 'warofsupply_v2_';
+
+function lsGet(key){
+  try{ const raw = localStorage.getItem(LS_PREFIX+key); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+function lsSet(key, obj){
+  try{ localStorage.setItem(LS_PREFIX+key, JSON.stringify(obj)); return true; }catch(e){ return false; }
+}
+function lsListKeys(prefix){
+  const out = [];
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.indexOf(LS_PREFIX+prefix)===0) out.push(k.slice(LS_PREFIX.length));
+    }
+  }catch(e){}
+  return out;
+}
+function lsDelete(key){ try{ localStorage.removeItem(LS_PREFIX+key); }catch(e){} }
+
+async function persistRecord(key, record, shared){
+  lsSet(key, record);
+  if(HAS_CLOUD){
+    try{ await window.storage.set(key, JSON.stringify(record), !!shared); }catch(e){}
+  }
+}
+async function fetchRecord(key, shared){
+  const local = lsGet(key);
+  if(local) return local;
+  if(HAS_CLOUD){
+    try{
+      const res = await window.storage.get(key, !!shared);
+      if(res && res.value) return JSON.parse(res.value);
+    }catch(e){}
+  }
+  return null;
+}
+
+/* ============================================================
+   TEAM SETUP + SESSION PERSISTENCE
+============================================================ */
+document.getElementById('lockTeamBtn').addEventListener('click', async ()=>{
+  const val = document.getElementById('teamNameInput').value.trim();
+  if(!val){ notify('Enter a team name first.'); return; }
+  teamName = val;
+  teamKey = 'team_' + slug(val);
+  document.getElementById('teamNameInput').disabled = true;
+  document.getElementById('lockTeamBtn').disabled = true;
+  await tryRestoreSession();
+  renderAll();
+  renderSyncModeBanner();
+  restoreRoundFields();
+  startTimerOnce();
+});
+
+function renderSyncModeBanner(){
+  const el = document.getElementById('syncModeBanner');
+  if(!el) return;
+  el.innerHTML = HAS_CLOUD
+    ? `<div class="flag ok">Live cross-device sync is active for this session.</div>`
+    : `<div class="flag info">Running standalone on this device. Progress is saved locally. Submit to obtain your Result Code for the master Scoreboard.</div>`;
+}
+
+async function saveSession(){
+  if(!teamKey || submitted) return;
+  await persistRecord('session_'+teamKey, {
+    teamName, sourcingAlloc, freqSel, calcInputs, crisisData, finalData, round5Data,
+    reco200: document.getElementById('reco200').value,
+    reco75: document.getElementById('reco75').value,
+    twistSel, crisisData, finalData,
+    secondsLeft, timerRunning
+  }, false);
+}
+let saveDebounce=null;
+function scheduleSave(){ clearTimeout(saveDebounce); saveDebounce=setTimeout(saveSession, 700); }
+
+async function tryRestoreSession(){
+  const d = await fetchRecord('session_'+teamKey, false);
+  if(d){
+    sourcingAlloc = d.sourcingAlloc || sourcingAlloc;
+    freqSel = d.freqSel || freqSel;
+    calcInputs = d.calcInputs || calcInputs;
+    secondsLeft = (typeof d.secondsLeft==='number') ? d.secondsLeft : secondsLeft;
+    setTimeout(()=>{
+      document.getElementById('reco200').value = d.reco200||'';
+      document.getElementById('reco75').value = d.reco75||'';
+      twistSel = d.twistSel || twistSel;
+      crisisData = d.crisisData || crisisData; finalData = d.finalData || finalData;
+      round5Data = d.round5Data || round5Data;
+      ['twist1','twist2','twist3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=twistSel[id]||''; });
+      updateClockDisplay();
+      bindFlowRound();
+    },0);
+  }
+  const submittedRecord = await fetchRecord(teamKey, true);
+  if(submittedRecord){
+    submitted = true;
+    showSubmittedState(submittedRecord);
+  }
+}
+
+/* ============================================================
+   TIMER DISPLAY
+============================================================ */
+function updateClockDisplay(){
+  const m = Math.floor(secondsLeft/60), s = secondsLeft%60;
+  document.getElementById('clockDisplay').textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('timerBox').classList.toggle('warn', secondsLeft<=300);
+}
+updateClockDisplay();
+
+/* ============================================================
+   RENDER: SOURCING
+============================================================ */
+function renderSupplierRef(){
+  let html = '<tr><th>Supply Base</th><th class="num">Price / kit (Rs)</th><th class="num">Capacity (kits/wk)</th>';
+  PLANTS.forEach(p=> html += `<th class="num">Route Dist→${CAMP_NAMES[p]} (km)</th>`);
+  html += '</tr>';
+  SUPPLIERS.forEach(s=>{
+    html += `<tr><td>${s.name}</td><td class="num">${s.price}</td><td class="num">${s.cap}</td>`;
+    PLANTS.forEach(p=> html += `<td class="num">${s.dist[p]}</td>`);
+    html += `</tr>`;
+  });
+  document.getElementById('supplierRefTable').innerHTML = html;
+}
+
+function updateSourcingTotals(){
+  const rowTotals = {};
+  const colTotals = {};
+  PLANTS.forEach(p=>colTotals[p]=0);
+
+  SUPPLIERS.forEach(s=>{
+    rowTotals[s.id] = PLANTS.reduce((sum,p)=>sum + (sourcingAlloc[s.id][p] || 0), 0);
+    PLANTS.forEach(p=>{
+      colTotals[p] += (sourcingAlloc[s.id][p] || 0);
+    });
+  });
+
+  SUPPLIERS.forEach(s=>{
+    const el = document.querySelector(`[data-row-total="${s.id}"]`);
+    if(el){
+      const total = rowTotals[s.id];
+      el.textContent = total;
+      el.style.color = total > s.cap ? '#A6373D' : '#5B5A52';
+    }
+  });
+
+  PLANTS.forEach(p=>{
+    const el = document.querySelector(`[data-col-total="${p}"]`);
+    if(el){
+      const total = colTotals[p];
+      el.textContent = total + (Math.abs(total-PLANT_REQ) <= 0.5 ? ' ✓' : '');
+    }
+  });
+
+  const grandTotal = PLANTS.reduce((sum,p)=>sum + colTotals[p], 0);
+  const grandEl = document.querySelector('[data-grand-total]');
+  if(grandEl) grandEl.textContent = grandTotal;
+}
+
+function renderSourcingTable(){
+  let html = '<tr><th>Supply Base</th>';
+  PLANTS.forEach(p=> html += `<th class="num">→ ${CAMP_NAMES[p]}</th>`);
+  html += '<th class="num">Row Total</th><th class="num">Capacity</th></tr>';
+
+  SUPPLIERS.forEach(s=>{
+    const a = sourcingAlloc[s.id];
+    const rowTotal = PLANTS.reduce((sum, p) => sum + (a[p] || 0), 0);
+    html += `<tr><td>${s.name}</td>`;
+    PLANTS.forEach(p=>{
+      html += `<td class="num"><input type="number" min="0" step="10" data-sup="${s.id}" data-plant="${p}" value="${a[p]||0}" class="allocInput"></td>`;
+    });
+    html += `<td class="num" data-row-total="${s.id}" style="color:${rowTotal>s.cap?'#A6373D':'#5B5A52'};">${rowTotal}</td><td class="num">${s.cap}</td></tr>`;
+  });
+
+  let colTotals = {};
+  PLANTS.forEach(p=> colTotals[p]=0);
+  SUPPLIERS.forEach(s=>{ PLANTS.forEach(p=>{ colTotals[p]+= (sourcingAlloc[s.id][p]||0); }); });
+
+  const grandTotal = PLANTS.reduce((sum,p)=>sum + colTotals[p], 0);
+  html += `<tr class="total-row"><td>Column Total (need 250 each)</td>`;
+  PLANTS.forEach(p=> {
+    const status = Math.abs(colTotals[p]-PLANT_REQ) <= 0.5 ? ' ✓' : '';
+    html += `<td class="num" data-col-total="${p}">${colTotals[p]}${status}</td>`;
+  });
+  html += `<td class="num" data-grand-total>${grandTotal}</td><td class="num">${PLANTS.length*PLANT_REQ}</td></tr>`;
+
+  document.getElementById('sourcingTable').innerHTML = html;
+
+  document.querySelectorAll('.allocInput').forEach(inp=>{
+    inp.addEventListener('input', (e)=>{
+      const sup = e.target.dataset.sup, plant = e.target.dataset.plant;
+      const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+      sourcingAlloc[sup][plant] = Math.max(0, Number.isFinite(value) ? value : 0);
+      updateSourcingTotals();
+      renderSourcingSummary();
+      scheduleSave();
+    });
+  });
+
+  renderSourcingSummary();
+}
+
+function computeSourcing(alloc){
+  alloc = alloc || sourcingAlloc;
+  let total = 0, landed = 0, feasible = true, msgs = [];
+  let colTotals = {};
+  PLANTS.forEach(p=> colTotals[p]=0);
+  
+  SUPPLIERS.forEach(s=>{
+    let rt = 0;
+    PLANTS.forEach(p=>{
+      const q = (alloc[s.id] && alloc[s.id][p])||0;
+      landed += q*landedCost(s,p);
+      colTotals[p]+=q;
+      rt+=q;
+    });
+    if(rt > s.cap+0.001){ feasible=false; msgs.push(`${s.name} exceeds its ${s.cap} units/wk capacity.`); }
+  });
+  PLANTS.forEach(p=>{
+    if(Math.abs(colTotals[p]-PLANT_REQ) > 0.5){ feasible=false; msgs.push(`${CAMP_NAMES[p]} totals ${colTotals[p]} units, not the required 250.`); }
+  });
+  const carry = 0.5*landed*CAMP_CARRY_RATE/52;   // avg camp stock = half a week of supply
+  total = landed + carry;
+  return {total, landed, carry, feasible, msgs};
+}
+
+function renderSourcingSummary(){
+  const r = computeSourcing();
+  document.getElementById('sourcingTotalCost').textContent = r.total.toFixed(2);
+  const feasDiv = document.getElementById('sourcingFeasibility');
+  if(r.feasible){
+    feasDiv.innerHTML = `<div class="flag ok">Feasible allocation — every plant has exactly 250 kits/week and no supply base exceeds capacity.</div>`;
+  }else{
+    feasDiv.innerHTML = `<div class="flag bad">Not yet feasible: ${r.msgs.join(' ')}</div>`;
+  }
+}
+
+/* ============================================================
+   RENDER: DISTRIBUTION
+============================================================ */
+function renderMethodCards(){
+  let html = '';
+  Object.keys(METHODS).forEach(key=>{
+    const m = METHODS[key];
+    const n = parseInt(freqSel[key])||0;
+    const ci = calcInputs[key];
+    const field = (name,label)=>`<div class="kv"><span>${label}</span>
+      <input type="number" class="calcInput" data-method="${key}" data-field="${name}" value="${ci[name]}" style="width:140px; text-align:right;"></div>`;
+    html += `<div class="method-card">
+      <h4>${m.label}</h4>
+      <div class="kv"><span>Shipment frequency (weeks between shipments)</span>
+        <select class="freqSelect" data-method="${key}">
+          <option value="">— choose —</option>
+          <option value="1" ${n===1?'selected':''}>Once a week</option>
+          <option value="2" ${n===2?'selected':''}>Once every 2 weeks</option>
+          <option value="3" ${n===3?'selected':''}>Once every 3 weeks</option>
+          <option value="4" ${n===4?'selected':''}>Once every 4 weeks</option>
+        </select>
+      </div>
+      ${field('transport','Transport Cost / year (Rs)')}
+      ${field('avgInv','Average Inventory (kits)')}
+      ${field('icc200','Inventory Carrying Cost @ Rs 200/kit (Rs)')}
+      ${field('total200','Total Cost @ Rs 200/kit (Rs)')}
+      ${field('icc75','Inventory Carrying Cost @ Rs 75/kit (Rs)')}
+      ${field('total75','Total Cost @ Rs 75/kit (Rs)')}
+    </div>`;
+  });
+  document.getElementById('methodCards').innerHTML = html;
+  document.querySelectorAll('.freqSelect').forEach(sel=>{
+    sel.addEventListener('change', (e)=>{
+      freqSel[e.target.dataset.method] = e.target.value;
+      scheduleSave();
+    });
+  });
+  document.querySelectorAll('.calcInput').forEach(inp=>{
+    inp.addEventListener('input', (e)=>{
+      calcInputs[e.target.dataset.method][e.target.dataset.field] = e.target.value;
+      scheduleSave();
+    });
+  });
+}
+
+document.getElementById('reco200').addEventListener('change', scheduleSave);
+document.getElementById('reco75').addEventListener('change', scheduleSave);
+
+/* ============================================================
+   ROUND 3 + ADVANCED LIVE EVENTS
+============================================================ */
+function bindLiveRounds(){
+  const ids=['crisisDirectQty','crisisMilkrunQty','crisisViadcQty','crisisTransportTotal','crisisGrandTotal'];
+  ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;el.addEventListener('input',()=>{updateRoundState();scheduleSave();});el.addEventListener('change',()=>{updateRoundState();scheduleSave();});});
+  updateRoundState();
+}
+function updateRoundState(){
+  [['crisisDirectQty','directQty'],['crisisMilkrunQty','milkrunQty'],['crisisViadcQty','viadcQty'],['crisisTransportTotal','transportTotal'],['crisisGrandTotal','grandTotal']].forEach(([id,k])=>{const el=document.getElementById(id);if(el)crisisData[k]=el.value;});
+  renderCrisisFeedback();
+}
+function renderCrisisFeedback(){
+  const el=document.getElementById('crisisFeedback');if(!el)return;
+  const d=parseFloat(crisisData.directQty)||0, m=parseFloat(crisisData.milkrunQty)||0, v=parseFloat(crisisData.viadcQty)||0;
+  const sum=d+m+v;
+  const flags=[];
+  if(d===0&&m===0&&v===0){el.innerHTML='<div class="flag info">Two disruptions are active at once. Split the 380 kits across routes, respecting each cap, then price the whole dispatch.</div>';return;}
+  if(d>CRISIS.direct.cap) flags.push(`Direct exceeds its ${CRISIS.direct.cap}-kit cap.`);
+  if(m>CRISIS.milkrun.cap) flags.push(`Milk-Run exceeds its ${CRISIS.milkrun.cap}-kit cap.`);
+  if(v>CRISIS.viadc.cap) flags.push(`Via DC exceeds its ${CRISIS.viadc.cap}-kit cap.`);
+  if(sum!==CRISIS.demand) flags.push(`Routes currently total ${sum} kits — the field hospital needs exactly ${CRISIS.demand}.`);
+  if(flags.length){el.innerHTML='<div class="flag bad">'+flags.join(' ')+'</div>';return;}
+  el.innerHTML='<div class="flag ok">Split is feasible. Now price it: freight per route used, plus any flat fees, then enter the totals.</div>';
+}
+function restoreRoundFields(){
+  const map={crisisDirectQty:crisisData.directQty,crisisMilkrunQty:crisisData.milkrunQty,crisisViadcQty:crisisData.viadcQty,crisisTransportTotal:crisisData.transportTotal,crisisGrandTotal:crisisData.grandTotal};
+  Object.entries(map).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v||'';});
+  updateRoundState();
+  bindFlowRound();
+}
+
+/* ============================================================
+   ROUND 4 · FLOW CONTROL — DATA & ENGINE
+============================================================ */
+const FLOW_BATCHES = [
+  {id:'F1', type:'Priority Combat', kits:60, hub:'W', arrived:'08:10', status:'Medically critical'},
+  {id:'F2', type:'Standard Ration', kits:140, hub:'X', arrived:'07:40', status:'Routine'},
+  {id:'F3', type:'Priority Combat', kits:90, hub:'Y', arrived:'08:25', status:'Medically critical'},
+  {id:'F4', type:'Standard Ration', kits:200, hub:'Z', arrived:'07:55', status:'Routine'},
+  {id:'F5', type:'Priority Combat', kits:40, hub:'W', arrived:'08:30', status:'Medically critical'},
+  {id:'F6', type:'Standard Ration', kits:110, hub:'X', arrived:'08:05', status:'Quality hold — pending inspection clearance'},
+  {id:'F7', type:'Priority Combat', kits:70, hub:'Y', arrived:'08:45', status:'Plasma cold-chain — 60-min release window'}
+];
+const FLOW_SEQ_KEY = {F1:1, F7:2, F3:3, F5:4, F6:5, F2:6, F4:7};
+const FLOW_NUM_KEY = {
+  ctn:9, flowTime:9,                         // before the hold — 450-kit WIP cap
+  ctn2:8, flowTime2:8,                       // after the hold — 400-kit WIP cap
+  takt:72                                        // sec/kit
+};
+const FLOW_CHANGEOVER_RATE = {before:8, after:15};   // minutes per kit-type switch in the team's own sequence
+const FLOW_NUM_IDS = {
+  flowCtn:'ctn', flowTime:'flowTime', flowChangeover:'changeover',
+  flowCtn2:'ctn2', flowTime2:'flowTime2', flowChangeover2:'changeover2',
+  flowTakt:'takt'
+};
+const FLOW_BOTTLENECK_KEY = 'spare';
+function typeOfBatch(id){ const b=FLOW_BATCHES.find(x=>x.id===id); return b?b.type:null; }
+function seqPermutationFrom(seqObj){
+  seqObj = seqObj||{};
+  const entries = FLOW_BATCHES.map(b=>[b.id, seqObj[b.id]]);
+  if(entries.some(([id,v])=>v===undefined||v==='')) return null;
+  const nums = entries.map(([id,v])=>parseInt(v));
+  if(new Set(nums).size !== nums.length) return null;
+  if(Math.min(...nums)!==1 || Math.max(...nums)!==FLOW_BATCHES.length) return null;
+  const ordered = new Array(FLOW_BATCHES.length);
+  entries.forEach(([id,v])=>{ ordered[parseInt(v)-1] = id; });
+  return ordered;
+}
+function switchCountFrom(ordered){
+  if(!ordered) return NaN;
+  let c=0;
+  for(let i=1;i<ordered.length;i++){ if(typeOfBatch(ordered[i])!==typeOfBatch(ordered[i-1])) c++; }
+  return c;
+}
+function changeoverTruthFrom(seqObj, rate){
+  const c = switchCountFrom(seqPermutationFrom(seqObj));
+  return Number.isFinite(c) ? c*rate : NaN;
+}
+
+function renderFlowSeqGrid(){
+  const el = document.getElementById('flowSeqGrid'); if(!el) return;
+  el.innerHTML = FLOW_BATCHES.map(b=>`
+    <div class="method-card">
+      <h4>${b.id} — ${b.type}</h4>
+      <div class="kv"><span>Kits</span><span class="v">${b.kits}</span></div>
+      <div class="kv"><span>Destination</span><span class="v">${HUB_NAMES[b.hub]}</span></div>
+      <div class="kv"><span>Arrived at DC</span><span class="v">${b.arrived}</span></div>
+      <div class="kv"><span>Status</span><span class="v">${b.status}</span></div>
+      <div class="kv"><span>Release position</span>
+        <select class="flowSeqSelect" data-batch="${b.id}" style="width:120px;">
+          <option value="">—</option>
+          ${Array.from({length:FLOW_BATCHES.length},(_,i)=>i+1).filter(n=>round5Data.seq[b.id]===String(n) || !Object.entries(round5Data.seq).some(([k,v])=>k!==b.id && v===String(n))).map(n=>`<option value="${n}" ${round5Data.seq[b.id]===String(n)?'selected':''}>${cmpOrd(n)}</option>`).join('')}
+        </select>
+      </div>
+    </div>`).join('');
+  el.querySelectorAll('.flowSeqSelect').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      round5Data.seq[e.target.dataset.batch] = e.target.value;
+      refreshFlowSeqOptions();
+      renderFlowSeqFeedback(); scheduleSave();
+    });
+  });
+}
+function refreshFlowSeqOptions(){
+  const used = id => Object.entries(round5Data.seq).some(([k,v])=>k===id && v!=='' );
+  document.querySelectorAll('.flowSeqSelect').forEach(sel=>{
+    const id = sel.dataset.batch, mine = round5Data.seq[id] || '';
+    const takenElsewhere = new Set(Object.entries(round5Data.seq).filter(([k,v])=>k!==id && v!=='').map(([k,v])=>v));
+    let html = '<option value="">—</option>';
+    for(let n=1;n<=FLOW_BATCHES.length;n++){
+      if(takenElsewhere.has(String(n))) continue;
+      html += `<option value="${n}" ${mine===String(n)?'selected':''}>${cmpOrd(n)}</option>`;
+    }
+    sel.innerHTML = html;
+    sel.value = mine;
+  });
+}
+function renderFlowSeqFeedback(){
+  const el = document.getElementById('flowSeqFeedback'); if(!el) return;
+  const n5 = FLOW_BATCHES.length;
+  const entries = Object.values(round5Data.seq).filter(v=>v!=='');
+  const nums = entries.map(Number);
+  const dup = new Set(nums).size !== nums.length;
+  if(entries.length < n5){ el.innerHTML = `<div class="flag info">Assign a release position to all ${n5} batches.</div>`; return; }
+  if(dup){ el.innerHTML = `<div class="flag bad">Each position (1st–${cmpOrd(n5)}) can only be used once — check for a repeat.</div>`; return; }
+  el.innerHTML = '<div class="flag ok">Sequence complete and valid.</div>';
+}
+function renderFlowNumFeedback(){
+  const el = document.getElementById('flowNumFeedback'); if(!el) return;
+  const numAnswered = Object.values(FLOW_NUM_IDS).filter(k=>round5Data[k]!=='').length;
+  const bnAnswered = round5Data.bottleneck ? 1 : 0;
+  const total = Object.keys(FLOW_NUM_IDS).length + 1;
+  el.innerHTML = `<div class="flag info">${numAnswered+bnAnswered}/${total} flow-control fields entered (before-the-hold, after-the-hold, takt, bottleneck call).</div>`;
+}
+function bindFlowRound(){
+  renderFlowSeqGrid(); renderFlowSeqFeedback();
+  Object.entries(FLOW_NUM_IDS).forEach(([id,key])=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.value = round5Data[key] || '';
+    el.oninput = ()=>{ round5Data[key]=el.value; renderFlowNumFeedback(); scheduleSave(); };
+  });
+  const bnEl = document.getElementById('flowBottleneck');
+  if(bnEl){
+    bnEl.value = round5Data.bottleneck || '';
+    bnEl.onchange = ()=>{ round5Data.bottleneck = bnEl.value; renderFlowNumFeedback(); scheduleSave(); };
+  }
+  renderFlowNumFeedback();
+}
+
+/* ============================================================
+   SCORING
+============================================================ */
+/* ---------- Graded scoring ----------
+   Exact answer = full marks. Otherwise credit falls linearly with the % deviation
+   from the correct value: 100% at ±FULL_CREDIT_PCT, 0% at ±ZERO_CREDIT_PCT.            */
+const FULL_CREDIT_PCT = 1;    // deviation still treated as exact (allows for rounding)
+const ZERO_CREDIT_PCT = 25;   // deviation at which credit reaches zero
+function creditForDeviation(devPct){
+  const d=Math.abs(devPct);
+  if(!Number.isFinite(d)) return 0;
+  if(d<=FULL_CREDIT_PCT) return 1;
+  if(d>=ZERO_CREDIT_PCT) return 0;
+  return 1-(d-FULL_CREDIT_PCT)/(ZERO_CREDIT_PCT-FULL_CREDIT_PCT);
+}
+function deviationPct(entered,correct){
+  const e=parseFloat(entered);
+  if(!Number.isFinite(e)||!Number.isFinite(correct)) return NaN;
+  if(correct===0) return Math.abs(e)<0.01?0:Infinity;
+  return (e-correct)/Math.abs(correct)*100;
+}
+function closeness(entered,correct){ return creditForDeviation(deviationPct(entered,correct)); }
+
+function trueMasterValues(key){const m=METHODS[key],n=m.correctFreq;return{transport:transportCost(m.distance,n),avgInv:avgInventory(key),icc200:iccCost(key,PRICE_200),total200:totalCost(m.distance,n,m.dcCost,PRICE_200,key),icc75:iccCost(key,PRICE_75),total75:totalCost(m.distance,n,m.dcCost,PRICE_75,key)};}
+
+/* Round 1 — supply plan: credit = cost closeness × feasibility (500 kits of violation = 0) */
+function sourcingBreakdown(alloc){
+  alloc=alloc||sourcingAlloc;
+  const r=computeSourcing(alloc);
+  const qty=(sid,p)=>Number(alloc[sid]&&alloc[sid][p])||0;
+  let viol=0;
+  SUPPLIERS.forEach(sp=>{ const rt=PLANTS.reduce((a,p)=>a+qty(sp.id,p),0); viol+=Math.max(0,rt-sp.cap); });
+  PLANTS.forEach(p=>{ const ct=SUPPLIERS.reduce((a,sp)=>a+qty(sp.id,p),0); viol+=Math.abs(ct-PLANT_REQ); });
+  const feas=Math.max(0,1-viol/(PLANTS.length*PLANT_REQ/2));
+  const cost=r.total>0?closeness(r.total,SOURCING_OPTIMAL):0;
+  return {total:r.total,feasible:r.feasible,viol,feas,cost,frac:feas*cost};
+}
+function sourcingScore(){ return 25*sourcingBreakdown().frac; }   // 0..25
+
+/* Round 2 */
+function freqCredit(sel,correct){ const n=parseInt(sel); if(!Number.isFinite(n)) return 0; return Math.max(0,1-Math.abs(n-correct)/3); }
+function freqScore(){ // 0..8 — nearer shipment frequency earns more
+  const keys=Object.keys(METHODS);
+  return 8*keys.reduce((a,k)=>a+freqCredit(freqSel[k],METHODS[k].correctFreq),0)/keys.length;
+}
+function calcScore(){ // 0..13 — every figure graded on % deviation
+  let f=0,n=0;
+  Object.keys(METHODS).forEach(key=>{const truth=trueMasterValues(key),entered=calcInputs[key];CALC_FIELDS.forEach(fl=>{f+=closeness(entered[fl],truth[fl]);n++;});});
+  return 13*f/n;
+}
+function recoScore(){ // 0..4 — a pick between methods is right or wrong
+  let pts=0;
+  if(document.getElementById('reco200').value===CORRECT_RECO.p200)pts+=2;
+  if(document.getElementById('reco75').value===CORRECT_RECO.p75)pts+=2;
+  return pts;
+}
+
+/* Round 3 */
+function crisisParts(cd){
+  const d=parseFloat(cd.directQty)||0, m=parseFloat(cd.milkrunQty)||0, v=parseFloat(cd.viadcQty)||0;
+  const sum=d+m+v, any=sum>0;
+  const excess=Math.max(0,d-CRISIS.direct.cap)+Math.max(0,m-CRISIS.milkrun.cap)+Math.max(0,v-CRISIS.viadc.cap)+Math.max(0,-d)+Math.max(0,-m)+Math.max(0,-v);
+  const truth=crisisTrueBreakdown(d,m,v);
+  const sumFrac=closeness(sum,CRISIS.demand);
+  const capsFrac=any?Math.max(0,1-excess/CRISIS.demand):0;
+  const freightFrac=any?closeness(cd.transportTotal,truth.freight):0;
+  const grandFrac=any?closeness(cd.grandTotal,truth.total):0;
+  const optFrac=any?sumFrac*capsFrac*closeness(truth.total,CRISIS_TRUE_MIN):0;
+  return {d,m,v,sum,any,excess,truth,sumFrac,capsFrac,freightFrac,grandFrac,optFrac};
+}
+function crisisScore(){ // 0..25 (weights 3 + 3 + 7 + 7 + 5)
+  const p=crisisParts(crisisData);
+  return 3*p.sumFrac+3*p.capsFrac+7*p.freightFrac+7*p.grandFrac+5*p.optFrac;
+}
+
+/* Round 4 — Flow Control */
+function seqCredit(pos,key){ const n=parseInt(pos); if(!Number.isFinite(n)) return 0; return Math.max(0,1-Math.abs(n-key)/(FLOW_BATCHES.length-1)); }
+function flowSeqFraction(){ const ids=Object.keys(FLOW_SEQ_KEY); return ids.reduce((a,id)=>a+seqCredit(round5Data.seq[id],FLOW_SEQ_KEY[id]),0)/ids.length; }
+function flowBaselineFraction(){
+  const chgTruth = changeoverTruthFrom(round5Data.seq, FLOW_CHANGEOVER_RATE.before);
+  return (closeness(round5Data.ctn,FLOW_NUM_KEY.ctn)+closeness(round5Data.flowTime,FLOW_NUM_KEY.flowTime)+closeness(round5Data.changeover,chgTruth))/3;
+}
+function flowRevisedFraction(){
+  const chgTruth = changeoverTruthFrom(round5Data.seq, FLOW_CHANGEOVER_RATE.after);
+  return (closeness(round5Data.ctn2,FLOW_NUM_KEY.ctn2)+closeness(round5Data.flowTime2,FLOW_NUM_KEY.flowTime2)+closeness(round5Data.changeover2,chgTruth))/3;
+}
+function flowTaktFraction(){ return (closeness(round5Data.takt,FLOW_NUM_KEY.takt)+(round5Data.bottleneck===FLOW_BOTTLENECK_KEY?1:0))/2; }
+function r5Score(){ return 5*flowSeqFraction()+4*flowBaselineFraction()+4*flowRevisedFraction()+2*flowTaktFraction(); } // 0..15
+
+function speedScore(){return Math.round(10*(secondsLeft/(TOTAL_MINUTES*60)));}
+function autoScoreBreakdown(){
+  // Four-round weighting: R1 25 · R2 25 (8+13+4) · R3 25 · R4 Flow 15 (5+4+4+2) · Speed 10 = 100
+  const src=sourcingScore(), frq=freqScore(), calc=calcScore(), rec=recoScore();
+  const cr=crisisScore(), spd=speedScore();
+  const r5seq=5*flowSeqFraction(), r5base=4*flowBaselineFraction(), r5rev=4*flowRevisedFraction(), r5takt=2*flowTaktFraction();
+  const r5=r5seq+r5base+r5rev+r5takt;
+  const total=Math.min(100,src+frq+calc+rec+cr+r5+spd);
+  return{src,frq,calc,rec,cr,r5,r5seq,r5base,r5rev,r5takt,spd,total};
+}
+
+/* ============================================================
+   REVIEW
+============================================================ */
+function renderReviewTable(){
+  const r=computeSourcing();
+  let rows='<tr><th>Section</th><th>Your Entry</th></tr>';
+  rows+=`<tr><td>Round 1 — Sourcing allocation</td><td>${r.feasible?'Feasible — total Rs '+r.total.toFixed(0)+'/week':'Not yet feasible — see Sourcing tab'} </td></tr>`;
+  Object.keys(METHODS).forEach(key=>{const m=METHODS[key],n=freqSel[key]?`Every ${freqSel[key]} week(s)`:'not set',ci=calcInputs[key],vals=CALC_FIELDS.map(f=>ci[f]===''?'—':ci[f]).join(' / ');rows+=`<tr><td>${m.label}</td><td>Frequency: ${n}<br>Transport / AvgInv / Inv. Carrying Cost 200 / Total200 / Inv. Carrying Cost 75 / Total75 = ${vals}</td></tr>`;});
+  rows+=`<tr><td>Round 2 — Priority Combat recommendation</td><td>${document.getElementById('reco200').value?METHODS[document.getElementById('reco200').value].label:'not set'}</td></tr>`;
+  rows+=`<tr><td>Round 2 — Standard Ration recommendation</td><td>${document.getElementById('reco75').value?METHODS[document.getElementById('reco75').value].label:'not set'}</td></tr>`;
+  rows+=`<tr><td>Round 3 — Ambush</td><td>Direct: ${crisisData.directQty||0} kits · Milk-Run: ${crisisData.milkrunQty||0} kits · Via DC: ${crisisData.viadcQty||0} kits · Freight: ${crisisData.transportTotal||'—'} · Grand total: ${crisisData.grandTotal||'—'}</td></tr>`;
+  const seqEntries=FLOW_BATCHES.map(b=>`${b.id}:${round5Data.seq[b.id]||'—'}`).join(' / ');
+  rows+=`<tr><td>Round 4 — Flow Control</td><td>Release order ${seqEntries}<br>Before the hold — Containers ${round5Data.ctn||'—'} · Flow time ${round5Data.flowTime||'—'} hrs · Changeover ${round5Data.changeover||'—'} min<br>After the hold — Containers ${round5Data.ctn2||'—'} · Flow time ${round5Data.flowTime2||'—'} hrs · Changeover ${round5Data.changeover2||'—'} min<br>Takt ${round5Data.takt||'—'} sec/kit · Bottleneck call: ${round5Data.bottleneck||'not set'}</td></tr>`;
+  document.getElementById('reviewTable').innerHTML=rows;
+}
+
+/* ============================================================
+   SUBMIT
+============================================================ */
+document.getElementById('submitBtn').addEventListener('click',async()=>{
+  if(!teamKey){notify('Set your team name in the header first.');return;}
+  const r=computeSourcing();
+  if(!r.feasible && !confirmTwice('submit',"Your sourcing allocation on the Sourcing tab doesn't add up yet. Click Lock Operation & Submit again to submit anyway.")) return;
+  const b=autoScoreBreakdown();
+  const record={teamName,submittedAt:Date.now(),sourcingAlloc,sourcingTotal:r.total,sourcingFeasible:r.feasible,freqSel,calcInputs,crisisData,finalData,round5Data,reco200:document.getElementById('reco200').value,reco75:document.getElementById('reco75').value,twistSel,autoScore:b,judgeScore:0};
+  await persistRecord(teamKey,record,true);submitted=true;showSubmittedState(record);clearInterval(timerInterval);timerRunning=false;
+});
+function makeResultCode(record){return btoa(unescape(encodeURIComponent(JSON.stringify(record))));}
+function showSubmittedState(record){
+  document.getElementById('submitArea').style.display='none';const msg=document.getElementById('submittedMsg');msg.style.display='block';msg.textContent=record&&record.autoSubmittedByTimer?"Time's up — your work was automatically submitted as it stood at the buzzer. Send your Result Code below to the facilitator.":'Submitted. Send your Result Code below to the facilitator.';
+  const code=makeResultCode(record);document.getElementById('resultCodeArea').style.display='block';document.getElementById('resultCodeBox').value=code;
+  const blob=new Blob([JSON.stringify(record,null,2)],{type:'application/json'});const dl=document.getElementById('downloadResultLink');dl.href=URL.createObjectURL(blob);dl.download=slug(record.teamName)+'_result.json';
+  document.getElementById('copyResultCodeBtn').onclick=()=>{document.getElementById('resultCodeBox').select();try{document.execCommand('copy');}catch(e){}navigator.clipboard&&navigator.clipboard.writeText(code).catch(()=>{});};
+}
+
+/* ============================================================
+   LEADERBOARD & FACILITATOR MODE
+============================================================ */
+async function collectAllTeamRecords(){
+  const map={};lsListKeys('team_').forEach(k=>{const d=lsGet(k);if(d&&d.teamName)map[k]=d;});
+  if(HAS_CLOUD){try{const list=await window.storage.list('team_',true);const keys=(list&&list.keys)?list.keys:[];for(const k of keys){try{const res=await window.storage.get(k,true);if(res&&res.value){const d=JSON.parse(res.value);if(!map[k]||(d.submittedAt||0)>=(map[k].submittedAt||0))map[k]=d;}}catch(e){}}}catch(e){}}
+  return map;
+}
+async function deleteTeamRecord(teamKeyName,teamDisplayName){if(!confirmTwice('del_'+teamKeyName,`Click Delete again within 6 seconds to remove "${teamDisplayName}" and its scores.`))return;lsDelete(teamKeyName);if(HAS_CLOUD){try{await window.storage.delete(teamKeyName,true);}catch(e){}}refreshLeaderboard();}
+async function refreshLeaderboard(){
+  const body=document.getElementById('leaderboardBody');body.innerHTML='<div style="padding:14px;">Loading…</div>';const map=await collectAllTeamRecords();
+  let rows=Object.entries(map).map(([k,d])=>({key:k,team:d.teamName,auto:(d.autoScore&&d.autoScore.total)||0,judge:d.judgeScore||0,final:Math.min(100,(d.autoScore&&d.autoScore.total)||0)}));rows.sort((a,b)=>b.final-a.final);
+  if(rows.length===0)body.innerHTML='<div style="padding:14px;color:var(--ink-soft);">No teams have submitted yet.</div>';else body.innerHTML=rows.map((r,i)=>{const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';return `<div class="leaderboard-row ${rc}"><div class="rank">${i+1}</div><div>${r.team}</div><div class="num">${r.auto.toFixed(0)}</div><div class="num" style="font-weight:700;">${r.final.toFixed(0)}</div><div style="text-align:center;"><button class="btn small secondary" onclick="deleteTeamRecord('${r.key}','${r.team.replace(/'/g,"\\'")}')" style="color:var(--thread);border-color:var(--thread);padding:2px 6px;font-size:11px;">Delete</button></div></div>`;}).join('');
+  populateJudgeSelect(rows.map(r=>r.team));
+}
+document.getElementById('refreshBoardBtn').addEventListener('click',refreshLeaderboard);
+document.getElementById('importCodeBtn').addEventListener('click',async()=>{const raw=document.getElementById('importCodeBox').value.trim(),msg=document.getElementById('importCodeMsg');if(!raw){msg.textContent='';return;}try{const record=JSON.parse(decodeURIComponent(escape(atob(raw))));if(!record.teamName)throw new Error('bad record');const key='team_'+slug(record.teamName);await persistRecord(key,record,true);document.getElementById('importCodeBox').value='';msg.style.color='var(--green)';msg.textContent=`Added ${record.teamName} to the board.`;refreshLeaderboard();}catch(e){msg.style.color='var(--thread-dark)';msg.textContent='That code did not parse — check it was copied in full.';}});
+document.getElementById('judgeLoginBtn').addEventListener('click',()=>{const val=document.getElementById('judgePasscode').value;if(val===JUDGE_PASSCODE){facUnlocked=true;document.getElementById('facLoginArea').style.display='none';document.getElementById('facPanel').style.display='block';refreshLeaderboard();}else notify('Incorrect passcode.');});
+function populateJudgeSelect(teams){const sel=document.getElementById('judgeTeamSelect'),current=sel.value;sel.innerHTML=teams.map(t=>`<option value="${t}">${t}</option>`).join('');if(teams.includes(current))sel.value=current;if(sel.value)loadTeamDetail(sel.value);}
+document.getElementById('judgeTeamSelect').addEventListener('change',e=>loadTeamDetail(e.target.value));
+async function loadTeamDetail(team){
+  if(!team){document.getElementById('teamDetailBox').innerHTML='';return;}const key='team_'+slug(team),d=await fetchRecord(key,true);if(!d)return;document.getElementById('autoScoreOverrideInput').value=(d.autoScore&&d.autoScore.total!==undefined)?d.autoScore.total.toFixed(0):0;document.getElementById('judgeScoreInput').value=d.judgeScore||0;const as=d.autoScore||{};
+  const html=`<h4 class="cmp-h" style="margin-top:4px;">Score breakdown</h4><div class="cmp-wrap"><table><tr><th>Component</th><th class="num">Points</th><th class="num">Max</th></tr>
+  <tr><td>Round 1 — Sourcing allocation accuracy</td><td class="num">${(as.src||0).toFixed(1)}</td><td class="num">25</td></tr>
+  <tr><td>Round 2 — Distribution frequency accuracy</td><td class="num">${(as.frq||0).toFixed(1)}</td><td class="num">8</td></tr>
+  <tr><td>Round 2 — Calculation accuracy</td><td class="num">${(as.calc||0).toFixed(1)}</td><td class="num">13</td></tr>
+  <tr><td>Round 2 — Correct method recommended</td><td class="num">${(as.rec||0).toFixed(1)}</td><td class="num">4</td></tr>
+  <tr><td>Round 3 — Ambush response</td><td class="num">${(as.cr||0).toFixed(1)}</td><td class="num">25</td></tr>
+  <tr><td>Round 4 — Release sequencing (7 batches)</td><td class="num">${(as.r5seq||0).toFixed(1)}</td><td class="num">5</td></tr>
+  <tr><td>Round 4 — Flow calc, before the hold</td><td class="num">${(as.r5base||0).toFixed(1)}</td><td class="num">4</td></tr>
+  <tr><td>Round 4 — Flow calc, after the hold</td><td class="num">${(as.r5rev||0).toFixed(1)}</td><td class="num">4</td></tr>
+  <tr><td>Round 4 — Takt &amp; bottleneck check</td><td class="num">${(as.r5takt||0).toFixed(1)}</td><td class="num">2</td></tr>
+  <tr><td>Speed bonus</td><td class="num">${(as.spd||0).toFixed(0)}</td><td class="num">10</td></tr>
+  <tr class="total-row"><td>Auto Score</td><td class="num">${(as.total||0).toFixed(1)}</td><td class="num">100</td></tr></table></div>`;
+  let cmp='';
+  try{ cmp=buildAnswerComparison(d); }catch(err){ cmp='<div class="flag bad">Could not build the answer comparison for this record.</div>'; }
+  document.getElementById('teamDetailBox').innerHTML=html+cmp;
+}
+
+/* ============================================================
+   COMMAND BOARD · TEAM ANSWERS vs CORRECT ANSWERS
+============================================================ */
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function cmpNum(v,dp){
+  if(v===''||v===null||v===undefined) return '—';
+  const n=parseFloat(v); if(!Number.isFinite(n)) return '—';
+  return n.toLocaleString('en-IN',{maximumFractionDigits:dp==null?2:dp});
+}
+function cmpDev(teamVal,correctVal){
+  const dv=deviationPct(teamVal,correctVal);
+  if(!Number.isFinite(dv)) return '—';
+  if(Math.abs(dv)<0.005) return '0.00%';
+  return (dv>0?'+':'')+dv.toFixed(2)+'%';
+}
+function cmpMark(f){
+  f=Math.max(0,Math.min(1,f||0));
+  if(f>=0.995) return '<span class="cmp-ok">✓ Full marks</span>';
+  if(f<=0.004) return '<span class="cmp-bad">✗ 0%</span>';
+  return `<span class="cmp-part">≈ ${Math.round(f*100)}% credit</span>`;
+}
+function cmpRow(label,team,correct,mark,dev){
+  return `<tr><td>${label}</td><td class="num">${team}</td><td class="num">${correct}</td><td>${mark}</td><td class="num">${dev==null?'—':dev}</td></tr>`;
+}
+function cmpNumRow(label,teamVal,correctVal,dp){
+  return cmpRow(label,cmpNum(teamVal,dp),cmpNum(correctVal,dp),cmpMark(closeness(teamVal,correctVal)),cmpDev(teamVal,correctVal));
+}
+function cmpTable(title,rows){
+  return `<h4 class="cmp-h">${title}</h4><div class="cmp-wrap"><table class="cmp-t"><tr><th>Item</th><th class="num">Team answer</th><th class="num">Correct answer</th><th>Marks earned</th><th class="num">Deviation</th></tr>${rows}</table></div>`;
+}
+function cmpOrd(n){n=parseInt(n);if(!Number.isFinite(n))return '—';return n===1?'1st':n===2?'2nd':n===3?'3rd':n+'th';}
+function cmpSigned(n,unit){return (n>0?'+':'')+n+' '+unit;}
+
+function buildAnswerComparison(d){
+  let out=`<h3 style="margin-top:22px;">Team answers vs correct answers</h3>
+  <div class="cmp-legend flag info"><span class="cmp-ok">✓ Full marks — within ±${FULL_CREDIT_PCT}% of the correct answer</span><span class="cmp-part">≈ Partial credit — falls in proportion to the deviation</span><span class="cmp-bad">✗ 0% — ${ZERO_CREDIT_PCT}% or more off, or not entered</span></div>`;
+
+  /* ---------- Round 1 ---------- */
+  const alloc=d.sourcingAlloc||{};
+  const sb=sourcingBreakdown(alloc);
+  let rows=cmpRow('Plan is feasible (every camp = 250, no base over capacity)',sb.viol<0.5?'Yes':'No','Yes',cmpMark(sb.feas),sb.viol>=0.5?cmpNum(sb.viol,0)+' kits off':'—');
+  rows+=cmpRow('Total weekly landed cost (Rs)',cmpNum(sb.total,2),cmpNum(SOURCING_OPTIMAL,2),cmpMark(sb.cost),sb.total>0?cmpDev(sb.total,SOURCING_OPTIMAL):'—');
+  rows+=cmpRow('<b>Round 1 credit</b> (feasibility × cost)','—','—',cmpMark(sb.frac),'—');
+  out+=cmpTable('Round 1 — Supply allocation',rows);
+  let grid='<div class="cmp-wrap"><table><tr><th>Supply base</th>'+PLANTS.map(p=>`<th class="num">→ ${CAMP_NAMES[p]}</th>`).join('')+'<th class="num">Row total (cap)</th></tr>';
+  SUPPLIERS.forEach(sp=>{
+    let rt=0;
+    grid+=`<tr><td>${sp.name}</td>`;
+    PLANTS.forEach(p=>{
+      const t=Number(alloc[sp.id]&&alloc[sp.id][p])||0, r=SOURCING_REF_ALLOC[sp.id][p]; rt+=t;
+      grid+=`<td class="num ${t===r?'cmp-same':'cmp-diff'}">${cmpNum(t,2)} <span class="cmp-ref">/ ${r}</span></td>`;
+    });
+    grid+=`<td class="num" style="${rt>sp.cap?'color:#F0A0A0;':''}">${cmpNum(rt,2)} (${sp.cap})</td></tr>`;
+  });
+  grid+='</table></div><p class="cmp-ref" style="margin:6px 0 0;">Each cell = team quantity / reference optimal quantity. The reference is one cost-optimal plan — a different allocation with the same total cost is equally correct, so judge on the cost row above.</p>';
+  out+=grid;
+
+  /* ---------- Round 2 ---------- */
+  const FIELD_LABELS={transport:'Transport cost / year (Rs)',avgInv:'Average inventory (kits)',icc200:'Inventory Carrying Cost @ Rs 200/kit (Rs)',total200:'Total cost @ Rs 200/kit (Rs)',icc75:'Inventory Carrying Cost @ Rs 75/kit (Rs)',total75:'Total cost @ Rs 75/kit (Rs)'};
+  rows='';
+  Object.keys(METHODS).forEach(key=>{
+    const m=METHODS[key], truth=trueMasterValues(key);
+    const tf=(d.freqSel||{})[key], ci=(d.calcInputs||{})[key]||{};
+    const tn=parseInt(tf);
+    rows+=`<tr class="cmp-group"><td colspan="5">${m.label}</td></tr>`;
+    rows+=cmpRow('Shipment frequency',tf?`Every ${esc(tf)} wk`:'—',`Every ${m.correctFreq} wk`,cmpMark(freqCredit(tf,m.correctFreq)),Number.isFinite(tn)?cmpSigned(tn-m.correctFreq,'wk'):'—');
+    CALC_FIELDS.forEach(f=>{ rows+=cmpNumRow(FIELD_LABELS[f],ci[f],truth[f],2); });
+  });
+  rows+='<tr class="cmp-group"><td colspan="5">Recommendation (a pick — right or wrong)</td></tr>';
+  const lbl=v=>METHODS[v]?METHODS[v].label:'—';
+  rows+=cmpRow('Best convoy — Priority Combat Kit (Rs 200)',lbl(d.reco200),lbl(CORRECT_RECO.p200),cmpMark(d.reco200===CORRECT_RECO.p200?1:0));
+  rows+=cmpRow('Best convoy — Standard Ration Kit (Rs 75)',lbl(d.reco75),lbl(CORRECT_RECO.p75),cmpMark(d.reco75===CORRECT_RECO.p75?1:0));
+  out+=cmpTable('Round 2 — Convoy economics',rows);
+
+  /* ---------- Round 3 ---------- */
+  const cd=d.crisisData||{};
+  const p3=crisisParts(cd);
+  const neu=(t,r)=>t===r?cmpMark(1):'<span class="cmp-neu">Different split (not scored on its own)</span>';
+  rows='';
+  rows+=cmpRow('Kits via Direct Convoy',cmpNum(p3.d,0),cmpNum(CRISIS_BEST_SPLIT.direct,0)+' <span class="cmp-ref">(cheapest split)</span>',neu(p3.d,CRISIS_BEST_SPLIT.direct));
+  rows+=cmpRow('Kits via Milk-Run Convoy',cmpNum(p3.m,0),cmpNum(CRISIS_BEST_SPLIT.milkrun,0)+' <span class="cmp-ref">(cheapest split)</span>',neu(p3.m,CRISIS_BEST_SPLIT.milkrun));
+  rows+=cmpRow('Kits via Srinagar DC',cmpNum(p3.v,0),cmpNum(CRISIS_BEST_SPLIT.viadc,0)+' <span class="cmp-ref">(cheapest split)</span>',neu(p3.v,CRISIS_BEST_SPLIT.viadc));
+  rows+=cmpRow('Total kits dispatched',cmpNum(p3.sum,0),cmpNum(CRISIS.demand,0),cmpMark(p3.sumFrac),cmpDev(p3.sum,CRISIS.demand));
+  rows+=cmpRow('Route caps respected',p3.any&&p3.excess===0?'Yes':'No','Yes',cmpMark(p3.capsFrac),p3.excess>0?cmpNum(p3.excess,0)+' kits over cap':'—');
+  rows+=cmpRow('Total freight cost for the team\'s own split (Rs)',cmpNum(cd.transportTotal,2),cmpNum(p3.truth.freight,2),cmpMark(p3.freightFrac),p3.any?cmpDev(cd.transportTotal,p3.truth.freight):'—');
+  rows+=cmpRow('Grand total for the team\'s own split (Rs)',cmpNum(cd.grandTotal,2),cmpNum(p3.truth.total,2),cmpMark(p3.grandFrac),p3.any?cmpDev(cd.grandTotal,p3.truth.total):'—');
+  rows+=cmpRow('Cost of the team\'s split vs cheapest feasible grand total (Rs)',cmpNum(p3.truth.total,2),cmpNum(CRISIS_TRUE_MIN,2),cmpMark(p3.optFrac),p3.any?cmpDev(p3.truth.total,CRISIS_TRUE_MIN):'—');
+  out+=cmpTable('Round 3 — Ambush (380-kit split dispatch)',rows);
+
+  /* ---------- Round 4 · Flow control ---------- */
+  const r5=d.round5Data||{seq:{}};
+  rows='<tr class="cmp-group"><td colspan="5">DC release sequence, 7 batches (credit falls with each place the batch is out)</td></tr>';
+  FLOW_BATCHES.forEach(b=>{
+    const tp=(r5.seq||{})[b.id], tn=parseInt(tp);
+    rows+=cmpRow(`${b.id} — ${b.type}, ${b.kits} kits → ${HUB_NAMES[b.hub]}`,cmpOrd(tp),cmpOrd(FLOW_SEQ_KEY[b.id]),cmpMark(seqCredit(tp,FLOW_SEQ_KEY[b.id])),Number.isFinite(tn)?cmpSigned(tn-FLOW_SEQ_KEY[b.id],'place'+(Math.abs(tn-FLOW_SEQ_KEY[b.id])===1?'':'s')):'—');
+  });
+  const chgBefore=changeoverTruthFrom(r5.seq,FLOW_CHANGEOVER_RATE.before), chgAfter=changeoverTruthFrom(r5.seq,FLOW_CHANGEOVER_RATE.after);
+  rows+='<tr class="cmp-group"><td colspan="5">Flow calculations — before the hold (450-kit WIP cap, 8 min/switch)</td></tr>';
+  rows+=cmpNumRow('Containers to cover the WIP cap',r5.ctn,FLOW_NUM_KEY.ctn,2);
+  rows+=cmpNumRow('Average flow time in WIP pool (hours)',r5.flowTime,FLOW_NUM_KEY.flowTime,2);
+  rows+=cmpNumRow('Changeover time for your own sequence (min)',r5.changeover,chgBefore,2);
+  rows+='<tr class="cmp-group"><td colspan="5">Flow calculations — after the hold (400-kit WIP cap, 15 min/switch)</td></tr>';
+  rows+=cmpNumRow('Containers to cover the reduced WIP cap',r5.ctn2,FLOW_NUM_KEY.ctn2,2);
+  rows+=cmpNumRow('Average flow time after the hold (hours)',r5.flowTime2,FLOW_NUM_KEY.flowTime2,2);
+  rows+=cmpNumRow('Changeover time for your own sequence, after the hold (min)',r5.changeover2,chgAfter,2);
+  rows+='<tr class="cmp-group"><td colspan="5">Takt time &amp; bottleneck check</td></tr>';
+  rows+=cmpNumRow('Takt time to meet downstream demand (sec/kit)',r5.takt,FLOW_NUM_KEY.takt,2);
+  const bnLbl=v=>v==='bottleneck'?'DC is the bottleneck':v==='spare'?'DC has spare capacity':v==='exact'?'DC is exactly at takt':'—';
+  rows+=cmpRow('Bottleneck call',bnLbl(r5.bottleneck),bnLbl(FLOW_BOTTLENECK_KEY),cmpMark(r5.bottleneck===FLOW_BOTTLENECK_KEY?1:0));
+  out+=cmpTable('Round 4 — Flow control',rows);
+
+  return out;
+}
+
+document.getElementById('judgeSaveBtn').addEventListener('click',async()=>{const team=document.getElementById('judgeTeamSelect').value;if(!team)return;const autoOverride=Math.max(0,parseFloat(document.getElementById('autoScoreOverrideInput').value)||0),judge=0,key='team_'+slug(team),d=await fetchRecord(key,true);if(d){d.autoScore=d.autoScore||{};d.autoScore.total=autoOverride;d.judgeScore=judge;await persistRecord(key,d,true);refreshLeaderboard();notify(`Saved for ${team}: auto ${autoOverride}, judge ${judge}.`);}});
+document.getElementById('resetAllBtn').addEventListener('click',async()=>{if(!confirmTwice('reset','This clears every team\'s score from this board. Click Reset ALL Scores again within 6 seconds to confirm.'))return;const keysToDelete=lsListKeys('team_');keysToDelete.forEach(k=>lsDelete(k));if(HAS_CLOUD){try{const list=await window.storage.list('team_',true);const keys=(list&&list.keys)?list.keys:[];for(const k of keys){try{await window.storage.delete(k,true);}catch(e){}}}catch(e){}}refreshLeaderboard();notify('Scoreboard cleared.');});
+
+/* ============================================================
+   INIT
+============================================================ */
+function renderAll(){renderSupplierRef();renderSourcingTable();renderMethodCards();}
+renderAll();renderSyncModeBanner();bindLiveRounds();bindFlowRound();setTimeout(restoreRoundFields,50);setInterval(renderReviewTable,2000);
+</script>
+
+<style>
+#sciCalcFab{position:fixed;right:18px;bottom:18px;z-index:9999;width:52px;height:52px;border-radius:50%;border:3px solid var(--canvas);background:var(--navy);color:var(--canvas);font:700 20px 'Space Grotesk',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35);}
+#sciCalcFab:hover{background:var(--thread);}
+#sciCalc{position:fixed;right:18px;bottom:80px;z-index:9999;width:318px;max-width:calc(100vw - 24px);background:var(--navy);border:2px solid var(--mustard);border-radius:6px;box-shadow:0 8px 26px rgba(0,0,0,.4);display:none;user-select:none;}
+#sciCalc.open{display:block;}
+#sciCalcHead{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;color:var(--canvas);font:600 12px 'Space Grotesk',sans-serif;letter-spacing:.08em;cursor:move;}
+#sciCalcHead button{background:none;border:0;color:var(--canvas);font-size:16px;cursor:pointer;}
+#sciCalcBody{padding:0 8px 8px;}
+#sciExpr{width:100%;background:#0f1a2b;color:#cfd8e6;border:1px solid #3a4d6b;border-radius:3px;padding:6px 8px;font:500 13px 'IBM Plex Mono',monospace;text-align:right;user-select:text;}
+#sciRes{min-height:30px;padding:2px 8px 6px;color:#F2D68A;font:500 20px 'IBM Plex Mono',monospace;text-align:right;overflow-x:auto;white-space:nowrap;}
+#sciKeys{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+#sciKeys button{padding:8px 0;border:0;border-radius:3px;background:#2d4466;color:#fff;font:600 13px 'Inter',sans-serif;cursor:pointer;}
+#sciKeys button:hover{filter:brightness(1.2);}
+#sciKeys button.num{background:#46576f;}
+#sciKeys button.op{background:var(--mustard);color:#1b2a41;}
+#sciKeys button.fn{background:#233C5C;}
+#sciKeys button.eq{background:var(--thread);}
+#sciKeys button.clr{background:#7a2a2f;}
+#sciMode{background:#0f1a2b;color:var(--mustard);border:1px solid var(--mustard);border-radius:3px;padding:2px 8px;font:600 11px 'IBM Plex Mono',monospace;cursor:pointer;}
+</style>
+<button id="sciCalcFab" type="button" title="Scientific calculator" aria-label="Open scientific calculator">&#8734;</button>
+<div id="sciCalc" role="dialog" aria-label="Scientific calculator">
+  <div id="sciCalcHead"><span>SCIENTIFIC CALCULATOR</span><span><button id="sciMode" type="button" title="Toggle degrees / radians">DEG</button> <button id="sciClose" type="button" aria-label="Close">&#10005;</button></span></div>
+  <div id="sciCalcBody">
+    <input id="sciExpr" type="text" autocomplete="off" spellcheck="false" placeholder="Type or tap an expression">
+    <div id="sciRes">0</div>
+    <div id="sciKeys"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var deg=true, ans=0, expr=document.getElementById('sciExpr'), res=document.getElementById('sciRes');
+  var panel=document.getElementById('sciCalc'), fab=document.getElementById('sciCalcFab');
+  function fact(n){ if(n<0||Math.floor(n)!==n||n>170) return NaN; var r=1; for(var i=2;i<=n;i++) r*=i; return r; }
+  var toRad=function(x){return deg?x*Math.PI/180:x;}, fromRad=function(x){return deg?x*180/Math.PI:x;};
+  var FUNCS={sin:function(x){return Math.sin(toRad(x));},cos:function(x){return Math.cos(toRad(x));},tan:function(x){return Math.tan(toRad(x));},
+    asin:function(x){return fromRad(Math.asin(x));},acos:function(x){return fromRad(Math.acos(x));},atan:function(x){return fromRad(Math.atan(x));},
+    sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,log:Math.log10,ln:Math.log,sqrt:Math.sqrt,cbrt:Math.cbrt,abs:Math.abs,exp:Math.exp,fact:fact};
+  function tokenize(src){
+    var t=[], i=0, m;
+    src=src.replace(/\u03c0/g,'pi').replace(/\u00d7/g,'*').replace(/\u00f7/g,'/').replace(/\u221a/g,'sqrt').replace(/\u2212/g,'-');
+    while(i<src.length){
+      var c=src[i];
+      if(/\s/.test(c)){i++;continue;}
+      if((m=/^(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i.exec(src.slice(i)))){t.push({n:parseFloat(m[0])});i+=m[0].length;continue;}
+      if((m=/^[a-z]+/i.exec(src.slice(i)))){t.push({id:m[0].toLowerCase()});i+=m[0].length;continue;}
+      if('+-*/^()!%,'.indexOf(c)>=0){t.push({op:c});i++;continue;}
+      throw new Error('Bad character: '+c);
+    }
+    return t;
+  }
+  function evaluate(src){
+    var t=tokenize(src), p=0;
+    function peek(){return t[p];}
+    function isOp(o){return t[p]&&t[p].op===o;}
+    function expect(o){ if(!isOp(o)) throw new Error('Expected '+o); p++; }
+    function startsOperand(x){ return x && (x.n!==undefined || x.id || x.op==='('); }
+    function parseExpr(){
+      var v=parseTerm();
+      while(isOp('+')||isOp('-')){ var o=t[p++].op, r=parseTerm(); v=o==='+'?v+r:v-r; }
+      return v;
+    }
+    function parseTerm(){
+      var v=parseUnary();
+      for(;;){
+        if(isOp('*')||isOp('/')){ var o=t[p++].op, r=parseUnary(); v=o==='*'?v*r:v/r; }
+        else if(startsOperand(peek())){ v=v*parseUnary(); }   /* implicit multiplication: 2pi, 3(4) */
+        else break;
+      }
+      return v;
+    }
+    function parseUnary(){
+      if(isOp('-')){p++;return -parseUnary();}
+      if(isOp('+')){p++;return parseUnary();}
+      return parsePow();
+    }
+    function parsePow(){
+      var b=parsePostfix();
+      if(isOp('^')){ p++; var e=parseUnary(); return Math.pow(b,e); }
+      return b;
+    }
+    function parsePostfix(){
+      var v=parseAtom();
+      while(isOp('!')||isOp('%')){ var o=t[p++].op; v=o==='!'?fact(v):v/100; }
+      return v;
+    }
+    function parseAtom(){
+      var x=t[p];
+      if(!x) throw new Error('Incomplete expression');
+      if(x.n!==undefined){p++;return x.n;}
+      if(x.op==='('){p++;var v=parseExpr();expect(')');return v;}
+      if(x.id){
+        p++;
+        if(x.id==='pi') return Math.PI;
+        if(x.id==='e') return Math.E;
+        if(x.id==='ans') return ans;
+        if(FUNCS[x.id]){
+          if(isOp('(')){p++;var a=parseExpr();expect(')');return FUNCS[x.id](a);}
+          return FUNCS[x.id](parseUnary());
+        }
+        throw new Error('Unknown: '+x.id);
+      }
+      throw new Error('Unexpected '+(x.op||''));
+    }
+    var out=parseExpr();
+    if(p<t.length) throw new Error('Unexpected '+(t[p].op||t[p].id||t[p].n));
+    return out;
+  }
+  function fmt(v){
+    if(!isFinite(v)) return 'Math error';
+    if(Math.abs(v)<1e-12) v=0;
+    var r=parseFloat(v.toPrecision(12));
+    var s=String(r);
+    if(Math.abs(r)>=1e15||(Math.abs(r)<1e-9&&r!==0)) s=r.toExponential(8).replace(/\.?0+e/,'e');
+    return s;
+  }
+  function calc(){
+    if(!expr.value.trim()) return;
+    try{ var v=evaluate(expr.value); res.textContent=fmt(v); if(isFinite(v)) ans=v; }
+    catch(err){ res.textContent='Error: '+err.message; }
+  }
+  function ins(txt){
+    var a=expr.selectionStart==null?expr.value.length:expr.selectionStart, b=expr.selectionEnd==null?a:expr.selectionEnd;
+    expr.value=expr.value.slice(0,a)+txt+expr.value.slice(b);
+    var pos=a+txt.length; expr.focus(); expr.setSelectionRange(pos,pos);
+  }
+  var KEYS=[
+    ['sin','fn','sin('],['cos','fn','cos('],['tan','fn','tan('],['log','fn','log('],['ln','fn','ln('],
+    ['asin','fn','asin('],['acos','fn','acos('],['atan','fn','atan('],['\u221a','fn','sqrt('],['\u221b','fn','cbrt('],
+    ['x\u00b2','fn','^2'],['x\u02b8','fn','^'],['n!','fn','!'],['e\u02e3','fn','exp('],['1/x','fn','1/('],
+    ['\u03c0','fn','pi'],['e','fn','e'],['(','fn','('],[')','fn',')'],['Ans','fn','Ans'],
+    ['7','num','7'],['8','num','8'],['9','num','9'],['\u00f7','op','/'],['C','clr','C'],
+    ['4','num','4'],['5','num','5'],['6','num','6'],['\u00d7','op','*'],['\u232b','clr','B'],
+    ['1','num','1'],['2','num','2'],['3','num','3'],['\u2212','op','-'],['%','op','%'],
+    ['0','num','0'],['.','num','.'],['EXP','num','e'],['+','op','+'],['=','eq','=']
+  ];
+  var keys=document.getElementById('sciKeys');
+  KEYS.forEach(function(k){
+    var b=document.createElement('button'); b.type='button'; b.textContent=k[0]; b.className=k[1];
+    b.addEventListener('mousedown',function(e){e.preventDefault();});
+    b.addEventListener('click',function(){
+      var a=k[2];
+      if(a==='C'){expr.value='';res.textContent='0';expr.focus();}
+      else if(a==='B'){var s=expr.selectionStart; if(s>0){expr.value=expr.value.slice(0,s-1)+expr.value.slice(expr.selectionEnd); expr.setSelectionRange(s-1,s-1);} expr.focus();}
+      else if(a==='='){calc();}
+      else ins(a);
+    });
+    keys.appendChild(b);
+  });
+  expr.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();calc();} e.stopPropagation(); });
+  document.getElementById('sciMode').addEventListener('click',function(){deg=!deg;this.textContent=deg?'DEG':'RAD';});
+  function toggle(open){ panel.classList.toggle('open',open); if(open) expr.focus(); }
+  fab.addEventListener('click',function(){toggle(!panel.classList.contains('open'));});
+  document.getElementById('sciClose').addEventListener('click',function(){toggle(false);});
+  /* drag by header */
+  var head=document.getElementById('sciCalcHead'), drag=null;
+  head.addEventListener('mousedown',function(e){
+    if(e.target.tagName==='BUTTON') return;
+    var r=panel.getBoundingClientRect(); drag={x:e.clientX-r.left,y:e.clientY-r.top};
+    panel.style.right='auto'; panel.style.bottom='auto'; panel.style.left=r.left+'px'; panel.style.top=r.top+'px'; e.preventDefault();
+  });
+  document.addEventListener('mousemove',function(e){ if(!drag) return;
+    panel.style.left=Math.max(0,Math.min(window.innerWidth-panel.offsetWidth,e.clientX-drag.x))+'px';
+    panel.style.top=Math.max(0,Math.min(window.innerHeight-panel.offsetHeight,e.clientY-drag.y))+'px'; });
+  document.addEventListener('mouseup',function(){drag=null;});
+})();
+</script>
+</body>
+</html>
+
+</body></html>
